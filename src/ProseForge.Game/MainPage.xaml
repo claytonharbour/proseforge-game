@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:engine="clr-namespace:Orbit.Engine;assembly=Orbit.Engine"
+             x:Class="ProseForge.Game.MainPage"
+             Title="One More Story" BackgroundColor="#101A1B">
+    <Grid RowDefinitions="Auto,*" RowSpacing="0" MaximumWidthRequest="600">
+        <Image Grid.RowSpan="2" Source="guild_hall_v1.png" Aspect="AspectFill" Opacity="0.9" />
+
+        <Border Grid.Row="0" BackgroundColor="#E5101A1B" StrokeThickness="0" Padding="12,8">
+            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                <Label Text="ONE MORE STORY" FontSize="17" FontAttributes="Bold" TextColor="#F7EEDC" />
+                <Label x:Name="CoinsLabel" Grid.Column="1" Text="0 coins" FontSize="17" TextColor="#EDB96B" />
+                <Label x:Name="GoalLabel" Grid.Row="1" Grid.ColumnSpan="2" Text="Open your guild." FontSize="11" TextColor="#F7EEDC" MaxLines="2" />
+                <Label x:Name="MessageLabel" Grid.Row="2" Grid.ColumnSpan="2" Text="A clean desk. A fresh pot of ink." FontSize="10" TextColor="#D2D8C5" MaxLines="1" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" RowDefinitions="*,*,*" Padding="10,4,10,112" RowSpacing="5">
+            <Border Grid.Row="0" VerticalOptions="End" BackgroundColor="#D9182320" Stroke="#A7824F" StrokeShape="RoundRectangle 8" Padding="6,2">
+                <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,2" ColumnSpacing="4" RowSpacing="1">
+                    <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                        <Label x:Name="MonkLabel" Text="♫ 1 monk · writing" FontSize="10" TextColor="#EDB96B">
+                            <Label.GestureRecognizers><TapGestureRecognizer Tapped="OnMonkVoiceTapped" /></Label.GestureRecognizers>
+                        </Label>
+                        <Label x:Name="PlainLabel" Text="Manuscripts: 0" FontSize="9" TextColor="#F7EEDC" />
+                    </VerticalStackLayout>
+                    <Button x:Name="CollectButton" Grid.Column="1" Text="Collect" FontSize="10" HeightRequest="28" Padding="4,0" Clicked="OnCollectClicked" BackgroundColor="#EDB96B" TextColor="#26251D" />
+                    <Button x:Name="SellPlainButton" Grid.Column="2" Text="Sell +5" FontSize="10" HeightRequest="28" Padding="4,0" Clicked="OnSellPlainClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
+                    <ProgressBar x:Name="MonkProgress" Grid.Row="1" Grid.ColumnSpan="3" HeightRequest="2" ProgressColor="#EDB96B" />
+                </Grid>
+            </Border>
+            <Image x:Name="ArtistActor" Grid.Row="1" Source="illuminator_v1.png" Aspect="AspectFit" WidthRequest="175" HeightRequest="175" HorizontalOptions="End" VerticalOptions="Center" Margin="0,-12,22,0" IsVisible="False">
+                <Image.GestureRecognizers><TapGestureRecognizer Tapped="OnArtistVoiceTapped" /></Image.GestureRecognizers>
+            </Image>
+            <Border Grid.Row="1" VerticalOptions="End" BackgroundColor="#D9182320" Stroke="#A7824F" StrokeShape="RoundRectangle 8" Padding="6,2">
+                <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,2" ColumnSpacing="4" RowSpacing="1">
+                    <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                        <Label x:Name="ArtistLabel" Text="Illuminator · empty" FontSize="10" TextColor="#EDB96B">
+                            <Label.GestureRecognizers><TapGestureRecognizer Tapped="OnArtistVoiceTapped" /></Label.GestureRecognizers>
+                        </Label>
+                        <Label x:Name="IllustratedLabel" Text="Illustrated: 0" FontSize="9" TextColor="#F7EEDC" />
+                    </VerticalStackLayout>
+                    <Button x:Name="QueueArtButton" Grid.Column="1" Text="Illustrate →" FontSize="10" HeightRequest="28" Padding="4,0" Clicked="OnQueueArtClicked" BackgroundColor="#EDB96B" TextColor="#26251D" />
+                    <Button x:Name="SellArtButton" Grid.Column="2" Text="Sell +12" FontSize="10" HeightRequest="28" Padding="4,0" Clicked="OnSellArtClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
+                    <ProgressBar x:Name="ArtistProgress" Grid.Row="1" Grid.ColumnSpan="3" HeightRequest="2" ProgressColor="#EDB96B" />
+                </Grid>
+            </Border>
+            <Image x:Name="BardActor" Grid.Row="2" Source="troubadour_v1.png" Aspect="AspectFit" WidthRequest="170" HeightRequest="170" HorizontalOptions="End" VerticalOptions="Center" Margin="0,-10,25,0" IsVisible="False">
+                <Image.GestureRecognizers><TapGestureRecognizer Tapped="OnBardVoiceTapped" /></Image.GestureRecognizers>
+            </Image>
+            <Border Grid.Row="2" VerticalOptions="End" BackgroundColor="#D9182320" Stroke="#A7824F" StrokeShape="RoundRectangle 8" Padding="6,2">
+                <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,2" ColumnSpacing="4" RowSpacing="1">
+                    <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                        <Label x:Name="BardLabel" Text="Troubadour · empty" FontSize="10" TextColor="#EDB96B">
+                            <Label.GestureRecognizers><TapGestureRecognizer Tapped="OnBardVoiceTapped" /></Label.GestureRecognizers>
+                        </Label>
+                        <Label x:Name="PerformedLabel" Text="Performed: 0" FontSize="9" TextColor="#F7EEDC" />
+                    </VerticalStackLayout>
+                    <Button x:Name="QueueBardButton" Grid.Column="1" Text="Perform →" FontSize="10" HeightRequest="28" Padding="4,0" Clicked="OnQueueBardClicked" BackgroundColor="#EDB96B" TextColor="#26251D" />
+                    <Button x:Name="SellBardButton" Grid.Column="2" Text="Sell +24" FontSize="10" HeightRequest="28" Padding="4,0" Clicked="OnSellBardClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
+                    <ProgressBar x:Name="BardProgress" Grid.Row="1" Grid.ColumnSpan="3" HeightRequest="2" ProgressColor="#EDB96B" />
+                </Grid>
+            </Border>
+            <engine:GameSceneView x:Name="GameView" IsVisible="False" HeightRequest="1" WidthRequest="1" />
+        </Grid>
+
+        <Border Grid.Row="1" VerticalOptions="End" BackgroundColor="#F0101A1B" Stroke="#786448" StrokeShape="RoundRectangle 12" Padding="10,6" Margin="6,0,6,6">
+            <VerticalStackLayout Spacing="4">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label x:Name="SoldLabel" Text="0 books sold" FontSize="11" TextColor="#D2D8C5" VerticalOptions="Center" />
+                    <Button x:Name="PauseButton" Grid.Column="1" Text="Pause" FontSize="11" HeightRequest="32" Padding="9,0" Clicked="OnPauseClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
+                </Grid>
+                <Button x:Name="OpenButton" Text="Open the guild" FontSize="13" HeightRequest="38" Clicked="OnOpenClicked" BackgroundColor="#EDB96B" TextColor="#26251D" />
+                <Button x:Name="RecruitTabButton" Text="Recruit your guild" FontSize="11" HeightRequest="32" Clicked="OnRecruitTabClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
+                <VerticalStackLayout x:Name="RecruitPanel" IsVisible="False" Spacing="2">
+                    <VerticalStackLayout.GestureRecognizers><SwipeGestureRecognizer Direction="Down" Swiped="OnRecruitSwipeDown" /></VerticalStackLayout.GestureRecognizers>
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="3">
+                        <Button x:Name="HireMonkButton" Text="Monk&#10;25 coins" FontSize="10" HeightRequest="48" Padding="2,0" Clicked="OnHireMonkClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
+                        <Button x:Name="HireArtistButton" Grid.Column="1" Text="Illuminator&#10;30 coins" FontSize="10" HeightRequest="48" Padding="2,0" Clicked="OnHireArtistClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
+                        <Button x:Name="HireBardButton" Grid.Column="2" Text="Troubadour&#10;60 coins" FontSize="10" HeightRequest="48" Padding="2,0" Clicked="OnHireBardClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
+                    </Grid>
+                    <HorizontalStackLayout Spacing="4">
+                        <Switch x:Name="VoiceSwitch" IsToggled="True" Toggled="OnVoiceToggled" Scale="0.7" />
+                        <Label x:Name="AudioStatusLabel" Text="Voices ready" FontSize="10" TextColor="#D2D8C5" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

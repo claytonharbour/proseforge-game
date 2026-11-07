@@ -1,0 +1,20 @@
+ProseForge Game
+Copyright 2026 Clayton Harbour
+
+This product includes software developed by Clayton Harbour for the book
+"A Claude Agent and a Codex Agent Walk Into a Room..." (https://claytonharbour.com/books).
+
+If you redistribute this software or a derivative work, keep this NOTICE file,
+as section 4(d) of the Apache License, Version 2.0 requires.
+
+Theme pack art is licensed separately; see the LICENSE file in each pack under themes/.
+
+Third-party software and fonts in this product, and their licences, are listed in
+THIRD_PARTY_NOTICES.md.
+
+Code, art, words and audio made by the project's AI agents are Clayton Harbour's. He licenses them as
+stated: Apache 2.0 for the code, CC BY 4.0 for the free theme packs (Village Bakery, Rocket Yard).
+
+"ProseForge" and "One More Story" are Clayton Harbour's names. The Apache License doesn't grant
+permission to use them (section 6): if you publish a game built from this code, give it your own
+name and icon.
