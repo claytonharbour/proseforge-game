@@ -5,9 +5,17 @@ using ProseForge.Game.Engine;
 
 namespace ProseForge.Game;
 
+// Where saves live: one string per key. The phone passes its Preferences, a test passes a
+// dictionary, so the save rules can be tested without a phone.
+public interface ISaveSlots
+{
+    string? Get(string key);
+    void Set(string key, string value);
+}
+
 // One save per theme, in that theme's own slot (EngineSaves.SlotKey), so switching themes never
 // touches another theme's game.
-public sealed class SaveStore
+public sealed class SaveStore(ISaveSlots slots)
 {
     private const string V1Key = "guild-save.v1";
 
@@ -25,15 +33,15 @@ public sealed class SaveStore
     }
 
     public void Save(GameSession session) =>
-        Preferences.Default.Set(EngineSaves.SlotKey(session.Gameplay), JsonSerializer.Serialize(
+        slots.Set(EngineSaves.SlotKey(session.Gameplay), JsonSerializer.Serialize(
             EngineSaves.Capture(session.Gameplay, session.State), SaveJson.Default.EngineSnapshot));
 
-    private static T? Read<T>(string key, JsonTypeInfo<T> type) where T : class
+    private T? Read<T>(string key, JsonTypeInfo<T> type) where T : class
     {
         try
         {
-            var json = Preferences.Default.Get(key, string.Empty);
-            return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize(json, type);
+            var json = slots.Get(key);
+            return json is null ? null : JsonSerializer.Deserialize(json, type);
         }
         catch (JsonException)
         {

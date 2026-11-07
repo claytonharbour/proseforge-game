@@ -431,6 +431,99 @@ Check(Math.Abs(visibleArt.Left - 60) < 0.5 && Math.Abs(visibleArt.Width - 960) <
     "AspectFill crop isn't what the phone shows");
 Console.WriteLine("PASS: live theme switch: index checked, drafts debug-only, each theme keeps its own game, broken packs change nothing, picker pauses, tape plays");
 
+// ---- Testable screen logic: what each row offers, the goal line, and saves without a phone ----
+var guildRules = guildTheme.Gameplay;
+EngineState Opened(Gameplay g) => GameEngine.Open(EngineState.New(g))!;
+var guildOpen = Opened(guildRules);
+var desk = ProseForge.Game.Presentation.StationRow.For(guildRules, guildOpen, guildTheme, 0, hasActor: true);
+Check(desk.Primary == ProseForge.Game.Presentation.RowAction.Collect && desk.PrimaryText == "Quill at work…" && !desk.PrimaryEnabled
+    && desk.SellVisible && desk.SellText == "Sell +5" && !desk.SellEnabled && desk.ActorVisible,
+    "The guild's desk row didn't offer an idle Collect and a Sell +5");
+var readyDesk = guildOpen.With(0, guildOpen.Stations[0] with { Ready = 3 });
+var collectNow = ProseForge.Game.Presentation.StationRow.For(guildRules, readyDesk, guildTheme, 0, true);
+Check(collectNow.PrimaryText == "Collect 3" && collectNow.PrimaryEnabled, "Ready manuscripts didn't enable Collect 3");
+var pausedDesk = ProseForge.Game.Presentation.StationRow.For(guildRules, readyDesk with { Paused = true }, guildTheme, 0, true);
+Check(!pausedDesk.PrimaryEnabled && !pausedDesk.HireEnabled, "A paused game still offered buttons");
+var emptyIllum = ProseForge.Game.Presentation.StationRow.For(guildRules, guildOpen, guildTheme, 1, true);
+Check(emptyIllum.Primary == ProseForge.Game.Presentation.RowAction.Send && emptyIllum.PrimaryText == "Illustrate 0 →" && !emptyIllum.PrimaryEnabled
+    && emptyIllum.Status == "Illuminator · empty workshop" && !emptyIllum.ActorVisible,
+    "An unstaffed illuminator row wasn't an empty, disabled send");
+var staffed = guildOpen.With(0, guildOpen.Stations[0] with { Stock = 5 }).With(1, guildOpen.Stations[1] with { Workers = 1 }) with { Coins = 100 };
+var illum = ProseForge.Game.Presentation.StationRow.For(guildRules, staffed, guildTheme, 1, true);
+Check(illum.PrimaryText == "Illustrate 1 →" && illum.PrimaryEnabled && illum.ActorVisible && illum.HireEnabled
+    && illum.HireText == "Illuminator\n45 coins",
+    "A staffed illuminator didn't offer one manuscript to send, or the next hire price is wrong");
+var santaTheme2 = toSanta.Theme!;
+var santaOpen = Opened(santaTheme2.Gameplay) with { Coins = 14 };
+var wrapRow = ProseForge.Game.Presentation.StationRow.For(santaTheme2.Gameplay, santaOpen, santaTheme2, 1, true);
+Check(wrapRow.Primary == ProseForge.Game.Presentation.RowAction.BuyTool && wrapRow.PrimaryText == "+1 tape · ♥ 15" && !wrapRow.PrimaryEnabled
+    && wrapRow.Stock.Contains("rolls of tape: 1") && !wrapRow.SellVisible,
+    "Santa's wrapping row didn't offer tape at 15, or showed a sell button on a pay-on-delivery line");
+Check(ProseForge.Game.Presentation.StationRow.For(santaTheme2.Gameplay, santaOpen with { Coins = 15 }, santaTheme2, 1, true).PrimaryEnabled,
+    "Fifteen hearts didn't enable the tape button");
+Check(ProseForge.Game.Presentation.StationRow.For(santaTheme2.Gameplay, santaOpen, santaTheme2, 0, true).Primary == ProseForge.Game.Presentation.RowAction.None,
+    "An automatic station grew a button");
+
+string Goal(EngineState st) => ProseForge.Game.Presentation.GoalText.Next(guildRules, st, guildTheme.Strings);
+var gs = guildTheme.Strings;
+Check(Goal(EngineState.New(guildRules)) == gs.GoalStart && Goal(guildOpen with { Paused = true }) == gs.GoalPaused
+    && Goal(guildOpen) == gs.GoalFirstSale, "The opening goals are out of order");
+var sold = guildOpen with { Delivered = 1 };
+Check(Goal(sold) == "Save 30 coins for an illuminator, or hire another monk for 25.", "The first hiring goal is wrong");
+var withIllum = sold.With(1, sold.Stations[1] with { Workers = 1 });
+Check(Goal(withIllum) == "Illustrate a manuscript and save 60 coins for a troubadour.", "The second hiring goal is wrong");
+var allStaffed = withIllum.With(2, withIllum.Stations[2] with { Workers = 1 });
+Check(Goal(allStaffed) == gs.GoalSendToLast && Goal(allStaffed.With(2, allStaffed.Stations[2] with { Workers = 1, Stock = 2 })) == gs.GoalSellLast
+    && Goal(allStaffed with { FinishedChain = true }) == gs.GoalChainDone, "The late-game goals are wrong");
+
+var memSlots = new MemorySlots();
+var saves = new SaveStore(memSlots);
+Check(saves.Load(guildRules) is null, "An empty phone produced a saved game");
+var oldGame = new GuildGameState();
+oldGame.Open(); for (var i = 0; i < 4; i++) oldGame.Tick(1); oldGame.Collect(); oldGame.Sell(0);
+var v1Json = System.Text.Json.JsonSerializer.Serialize(oldGame.Snapshot(), SaveJson.Default.GuildSnapshot);
+memSlots.Set("guild-save.v1", v1Json);
+var migrated2 = saves.Load(guildRules);
+Check(migrated2 is { Coins: 5, Delivered: 1, Started: true } && memSlots.Get("guild-save.v1") == v1Json && memSlots.Get("save.guild.v2") is null,
+    "A v1 save didn't migrate on load, or the v1 save was changed");
+var santaSession = new GameSession(santaTheme2.Gameplay, santaOpen);
+saves.Save(santaSession);
+saves.Save(new GameSession(guildRules, migrated2));
+Check(memSlots.Get("save.santa.v2") is not null && saves.Load(guildRules) is { Coins: 5 } && saves.Load(santaTheme2.Gameplay) is { Coins: 14 },
+    "Two themes' saves weren't kept in their own memSlots");
+memSlots.Set("save.guild.v2", "{not json");
+Check(saves.Load(guildRules) is { Coins: 5 }, "A corrupt v2 save didn't fall back to the v1 save");
+// Readable colours: theme-check warns when a text pair is under 4.5:1. Santa's first cranberry
+// palette put dark red text on an evergreen active button (2.65:1); Clayton spotted it on the phone.
+Check(Math.Abs(ThemePacks.Contrast("#000000", "#FFFFFF") - 21) < 0.01 && Math.Abs(ThemePacks.Contrast("#3A0E10", "#2F6B45") - 2.65) < 0.01,
+    "The contrast formula doesn't match WCAG");
+var santaJson = File.ReadAllText(Path.Combine(repo, "themes/santa/theme.json"));
+var oldGreen = ThemePacks.Load("santa", path => path == "themes/santa/theme.json"
+    ? new MemoryStream(System.Text.Encoding.UTF8.GetBytes(santaJson.Replace("\"buttonActive\": \"#E8C66A\"", "\"buttonActive\": \"#2F6B45\"")))
+    : FromDisk(path));
+Check(santaJson.Contains("\"buttonActive\": \"#E8C66A\"") && oldGreen.Loaded
+    && oldGreen.Problems.Any(p => p.Level == ProblemLevel.Warning && p.Message.Contains("buttonActive") && p.Message.Contains("2.6:1")),
+    "Dark red on evergreen wasn't flagged as hard to read");
+foreach (var id in index.Offered(includeDrafts: true))
+{
+    var pack = ThemePacks.Load(id, FromDisk);
+    Check(!pack.Problems.Any(p => p.Message.Contains("hard to read")), $"Pack {id} has a hard-to-read colour pair: "
+        + string.Join("; ", pack.Problems.Where(p => p.Message.Contains("hard to read"))));
+}
+// Santa pays only for finished deliveries (FinalStageOnly), so no row offers Sell, even the delivery
+// row that has a price. Without this, dropping the payout rule from SellVisible passed every test
+// (a reviewer deleted the payout check on purpose, and no test noticed).
+var santaPack = toSanta.Theme!;
+var santaRows = Enumerable.Range(0, santaPack.Gameplay.Stations.Count)
+    .Select(i => ProseForge.Game.Presentation.StationRow.For(santaPack.Gameplay, Opened(santaPack.Gameplay), santaPack, i, true)).ToList();
+Check(santaPack.Gameplay.Payout == PayoutRule.FinalStageOnly && santaPack.Gameplay.Stations[^1].SellPrice is not null
+    && santaRows.All(r => !r.SellVisible), "A final-stage-only theme showed a Sell button");
+string[] shortCounts = [.. new long[] { 0, 2509, 9999, 10_000, 12_499, 99_999, 100_000, 999_999, 1_250_000, 3_000_000_000 }
+    .Select(ProseForge.Game.Presentation.Count.Short)];
+Check(string.Join(" ", shortCounts) == "0 2509 9999 10k 12.4k 99.9k 100k 999k 1.2M 3B",
+    $"The header count didn't shorten as expected: {string.Join(" ", shortCounts)}");
+Console.WriteLine("PASS: screen logic: every row's buttons from the rules, the goal line in order, and saves (v1 migration, one slot per theme) without a phone");
+
 const string feed = """
     {"books":[
       {"title":" First book ","tagline":"A little tale","slug":"first","listings":[{"url":"http://unsafe.example/book"},{"url":"https://books.example/book"}]},
@@ -572,4 +665,11 @@ sealed class ManualClock : TimeProvider
     public void Advance(double seconds) => ticks += (long)Math.Round(seconds * TimestampFrequency);
     public override long GetTimestamp() => ticks;
     public override long TimestampFrequency => 1_000_000;
+}
+
+sealed class MemorySlots : ISaveSlots
+{
+    private readonly Dictionary<string, string> values = [];
+    public string? Get(string key) => values.TryGetValue(key, out var value) ? value : null;
+    public void Set(string key, string value) => values[key] = value;
 }

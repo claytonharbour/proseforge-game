@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using ProseForge.Game.Engine;
+using ProseForge.Game.Presentation;
 using ProseForge.Game.Themes;
 
 namespace ProseForge.Game.ViewModels;
@@ -167,32 +168,14 @@ public sealed class GameViewModel : Observable
     {
         var s = State;
         var text = Theme.Strings;
-        Coins = ThemeText.Fill(text.Coins, ("n", s.Coins));
+        Coins = ThemeText.Fill(text.Coins, ("n", Count.Short(s.Coins)));
         Delivered = ThemeText.Fill(text.Delivered, ("n", s.Delivered));
         Started = s.Started;
         ShowOpen = !s.Started;
         Paused = s.Paused;
         PauseText = s.Paused ? text.Resume : text.Pause;
         RecruitText = RecruitOpen ? text.RecruitClose : text.Recruit;
-        Goal = NextGoal();
+        Goal = GoalText.Next(Rules, State, Theme.Strings);
         foreach (var station in Stations) station.Refresh();
-    }
-
-    // What to aim for next: open, unpause, make a first sale, staff each empty station in turn,
-    // then keep the last step busy.
-    private string NextGoal()
-    {
-        var s = State;
-        var text = Theme.Strings;
-        var game = Rules;
-        if (!s.Started) return text.GoalStart;
-        if (s.Paused) return text.GoalPaused;
-        if (s.Delivered == 0) return text.GoalFirstSale;
-        for (var i = 1; i < game.Stations.Count; i++)
-            if (s.Stations[i].Workers == 0 && i - 1 < text.GoalHire.Count)
-                return ThemeText.Fill(text.GoalHire[i - 1],
-                    ("cost", GameEngine.HireCost(game, s, i)), ("firstCost", GameEngine.HireCost(game, s, 0)));
-        if (s.FinishedChain) return text.GoalChainDone;
-        return s.Stations[^1].Stock == 0 ? text.GoalSendToLast : text.GoalSellLast;
     }
 }

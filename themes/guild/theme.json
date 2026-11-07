@@ -52,7 +52,7 @@
     "sellAll": "Sell all",
     "hireButton": "{label}\n{cost} coins",
     "recruit": "Recruit your guild",
-    "recruitClose": "✕ Close recruitment · swipe down",
+    "recruitClose": "✕ Close recruitment",
     "voicesReady": "Voices ready",
     "voicesOff": "Voices off",
     "voicePlaying": "Playing {name} greeting",

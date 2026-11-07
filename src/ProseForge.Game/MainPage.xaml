@@ -14,7 +14,7 @@
         <!-- Sizes here are ScreenLayout's (Themes/ScreenLayout.cs), which the art guide is drawn from. -->
         <Border Grid.Row="0" HeightRequest="92" BackgroundColor="{DynamicResource Header}" StrokeThickness="0" Padding="12,8">
             <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8">
-                <Label Text="{Binding Title}" FontSize="17" FontAttributes="Bold" TextColor="{DynamicResource Text}"
+                <Label Text="{Binding Title}" FontSize="15" FontAttributes="Bold" TextColor="{DynamicResource Text}"
                        MaxLines="1" LineBreakMode="TailTruncation" />
                 <Label Grid.Column="1" Text="{Binding Coins}" FontSize="17" TextColor="{DynamicResource Accent}" />
                 <Button x:Name="ThemeButton" Grid.Column="2" Text="Theme" FontSize="11" HeightRequest="30" Padding="6,0"
@@ -86,9 +86,6 @@
                     </Button.Triggers>
                 </Button>
                 <VerticalStackLayout IsVisible="{Binding RecruitOpen}" Spacing="2">
-                    <VerticalStackLayout.GestureRecognizers>
-                        <SwipeGestureRecognizer Direction="Down" Swiped="OnRecruitSwipeDown" />
-                    </VerticalStackLayout.GestureRecognizers>
                     <Grid x:Name="HireColumns" ColumnSpacing="3" BindableLayout.ItemsSource="{Binding Stations}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:StationViewModel">

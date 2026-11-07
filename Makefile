@@ -8,7 +8,7 @@
 
 TESTS := tests/ProseForge.Game.Rules.Tests
 
-.PHONY: build test theme-check theme-guide art-check
+.PHONY: build test coverage theme-check theme-guide art-check
 
 build: ## Compile the game's rules and engine (everything the tests cover).
 	dotnet build $(TESTS) -c Release
@@ -16,6 +16,12 @@ build: ## Compile the game's rules and engine (everything the tests cover).
 test: ## Run the rules tests and check every theme pack. Any failure exits non-zero.
 	dotnet run --project $(TESTS) -c Release
 	$(MAKE) theme-check
+
+coverage: ## Line coverage of the rules tests, per file (needs: dotnet tool install -g dotnet-coverage)
+	rm -rf build/coverage && dotnet build $(TESTS) -c Debug -o build/coverage/bin
+	cd build/coverage/bin && dotnet-coverage instrument ProseForge.Game.Rules.Tests.dll >/dev/null \
+		&& dotnet-coverage collect -f cobertura -o ../rules.cobertura.xml ./ProseForge.Game.Rules.Tests >/dev/null
+	python3 tools/coverage/summary.py build/coverage/rules.cobertura.xml src/ProseForge.Game
 
 theme-check: ## Check theme packs: make theme-check, or make theme-check THEME=guild
 	dotnet run --project tools/ThemeCheck -c Release -- . $(THEME)

@@ -186,6 +186,44 @@ public static partial class ThemePacks
         foreach (var (role, colour) in Colours(theme.Palette))
             if (!ColourPattern().IsMatch(colour))
                 Error($"palette.{role} \"{colour}\" isn't a colour. Use #RRGGBB, or #AARRGGBB for transparency.");
+        if (Colours(theme.Palette).All(c => ColourPattern().IsMatch(c.Colour)))
+            foreach (var (text, back, where) in TextPairs(theme.Palette))
+                if (Contrast(text, back) < MinContrast)
+                    Warn($"{where} is hard to read: contrast {Contrast(text, back):0.0}:1, and text needs at least {MinContrast}:1 (WCAG AA). Change one of the two colours.");
+    }
+
+    // Text needs at least this much contrast with what is behind it (WCAG AA, normal text).
+    public const double MinContrast = 4.5;
+
+    // Every place the screen puts one palette colour on another (MainPage.xaml). Transparency is
+    // ignored: a panel's colour is judged as if solid, since the picture behind it varies.
+    private static IEnumerable<(string Text, string Back, string Where)> TextPairs(Palette p) =>
+    [
+        (p.Text, p.Header, "palette.text on palette.header (title, goal)"),
+        (p.MutedText, p.Header, "palette.mutedText on palette.header (the message line)"),
+        (p.Accent, p.Panel, "palette.accent on palette.panel (station status)"),
+        (p.Text, p.Panel, "palette.text on palette.panel (station stock)"),
+        (p.OnAccent, p.Accent, "palette.onAccent on palette.accent (main buttons)"),
+        (p.Text, p.Button, "palette.text on palette.button (other buttons)"),
+        (p.Background, p.ButtonActive, "palette.background on palette.buttonActive (an open panel's button)"),
+        (p.MutedText, p.Dock, "palette.mutedText on palette.dock (delivered count)"),
+    ];
+
+    // WCAG contrast ratio of two #RRGGBB / #AARRGGBB colours, alpha ignored.
+    public static double Contrast(string a, string b)
+    {
+        static double Luminance(string hex)
+        {
+            var rgb = hex.TrimStart('#')[^6..];
+            double Channel(int i)
+            {
+                var c = Convert.ToInt32(rgb.Substring(i, 2), 16) / 255.0;
+                return c <= 0.03928 ? c / 12.92 : Math.Pow((c + 0.055) / 1.055, 2.4);
+            }
+            return 0.2126 * Channel(0) + 0.7152 * Channel(2) + 0.0722 * Channel(4);
+        }
+        var (la, lb) = (Luminance(a), Luminance(b));
+        return (Math.Max(la, lb) + 0.05) / (Math.Min(la, lb) + 0.05);
     }
 
     private static void CheckGameplay(Gameplay game, Action<string> error)

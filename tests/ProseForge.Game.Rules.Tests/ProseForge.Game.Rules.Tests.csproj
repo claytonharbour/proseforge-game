@@ -16,6 +16,8 @@
     <Compile Include="../../src/ProseForge.Game/Themes/ScreenLayout.cs" Link="Themes/ScreenLayout.cs" />
     <Compile Include="../../src/ProseForge.Game/Themes/PickerPause.cs" Link="Themes/PickerPause.cs" />
     <Compile Include="../../src/ProseForge.Game/BookCatalog.cs" Link="BookCatalog.cs" />
+    <Compile Include="../../src/ProseForge.Game/SaveStore.cs" Link="SaveStore.cs" />
+    <Compile Include="../../src/ProseForge.Game/Presentation/*.cs" Link="Presentation/%(Filename)%(Extension)" />
     <Compile Include="../../src/ProseForge.Game/BookCatalogService.cs" Link="BookCatalogService.cs" />
   </ItemGroup>
 </Project>

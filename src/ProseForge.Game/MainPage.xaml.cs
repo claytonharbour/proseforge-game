@@ -155,8 +155,6 @@ public partial class MainPage : ContentPage
         return card;
     }
 
-    private void OnRecruitSwipeDown(object? sender, SwipedEventArgs e) => model.RecruitOpen = false;
-
     protected override void OnHandlerChanging(HandlerChangingEventArgs args)
     {
         if (args.NewHandler is null)

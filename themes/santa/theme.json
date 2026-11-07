@@ -15,7 +15,7 @@
     "text": "#FFF4EC",
     "mutedText": "#F2D3CC",
     "button": "#7A1E22",
-    "buttonActive": "#2F6B45",
+    "buttonActive": "#E8C66A",
     "dock": "#F03A0E10",
     "dockStroke": "#C9A24A"
   },
@@ -69,7 +69,7 @@
     "sellAll": "Deliver all",
     "hireButton": "{label}\n♥ {cost}",
     "recruit": "Hire helpers",
-    "recruitClose": "✕ Close · swipe down",
+    "recruitClose": "✕ Close",
     "voicesReady": "Voices ready",
     "voicesOff": "Voices off",
     "voicePlaying": "Playing {name}",

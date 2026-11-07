@@ -86,7 +86,7 @@
     "pausedMessage": "The ovens are banked.",
     "resumedMessage": "The bell over the door rings again.",
     "recruit": "Hire bakers",
-    "recruitClose": "✕ Close · swipe down",
+    "recruitClose": "✕ Close",
     "goalStart": "Open the bakery.",
     "goalPaused": "Paused. Resume when you're ready.",
     "goalFirstSale": "Collect dough and sell it for your first 2 coins.",
