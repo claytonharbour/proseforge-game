@@ -7,5 +7,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../src/ProseForge.Game/GuildGameState.cs" Link="GuildGameState.cs" />
+    <Compile Include="../../src/ProseForge.Game/Engine/*.cs" Link="Engine/%(Filename)%(Extension)" />
+    <Compile Include="../../src/ProseForge.Game/Themes/Theme.cs" Link="Themes/Theme.cs" />
+    <Compile Include="../../src/ProseForge.Game/Themes/ThemeText.cs" Link="Themes/ThemeText.cs" />
+    <Compile Include="../../src/ProseForge.Game/Themes/ThemeJson.cs" Link="Themes/ThemeJson.cs" />
+    <Compile Include="../../src/ProseForge.Game/Themes/ThemePacks.cs" Link="Themes/ThemePacks.cs" />
+    <Compile Include="../../src/ProseForge.Game/Themes/ThemeSwitch.cs" Link="Themes/ThemeSwitch.cs" />
+    <Compile Include="../../src/ProseForge.Game/Themes/ScreenLayout.cs" Link="Themes/ScreenLayout.cs" />
+    <Compile Include="../../src/ProseForge.Game/Themes/PickerPause.cs" Link="Themes/PickerPause.cs" />
+    <Compile Include="../../src/ProseForge.Game/BookCatalog.cs" Link="BookCatalog.cs" />
+    <Compile Include="../../src/ProseForge.Game/BookCatalogService.cs" Link="BookCatalogService.cs" />
   </ItemGroup>
 </Project>

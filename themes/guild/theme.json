@@ -1,0 +1,73 @@
+{
+  "$schema": "../theme.schema.json",
+  "id": "guild",
+  "title": "ONE MORE STORY",
+  "license": "Copyright Clayton Harbour. All rights reserved. Not for redistribution.",
+  "gameplay": "gameplay.json",
+  "background": "art/guild-hall.png",
+  "palette": {
+    "background": "#101A1B", "header": "#E5101A1B", "panel": "#D9182320", "panelStroke": "#A7824F",
+    "accent": "#EDB96B", "onAccent": "#26251D", "text": "#F7EEDC", "mutedText": "#D2D8C5",
+    "button": "#34403C", "buttonActive": "#A7824F", "dock": "#F0101A1B", "dockStroke": "#786448"
+  },
+  "stations": [
+    {
+      "worker": "monk", "workers": "monks", "activity": "writing", "empty": "Monk · empty desk",
+      "stockLabel": "Manuscripts: {n}", "hireLabel": "Monk", "hireMessage": "Another monk pulls up a chair.",
+      "voice": "audio/monk-welcome.wav",
+      "collectLabel": "Collect {n}", "idleLabel": "Quill at work…",
+      "collectMessage": "Fresh manuscripts on your desk. Sell now, or make something richer.",
+      "sellMessage": "A reader takes a story home. +{price} coins."
+    },
+    {
+      "worker": "illuminator", "workers": "illuminators", "activity": "illustrating",
+      "empty": "Illuminator · empty workshop", "stockLabel": "Illustrated: {n}",
+      "hireLabel": "Illuminator", "hireMessage": "The illuminator opens a box of pigments.",
+      "actor": "art/illuminator.png", "voice": "audio/artist-welcome.wav",
+      "sendLabel": "Illustrate {n} →", "sendMessage": "A manuscript arrives at the illustration desk.",
+      "sellMessage": "A reader takes a story home. +{price} coins."
+    },
+    {
+      "worker": "troubadour", "workers": "troubadours", "activity": "performing",
+      "empty": "Troubadour · empty alcove", "stockLabel": "Performed: {n}",
+      "hireLabel": "Troubadour", "hireMessage": "The troubadour tunes a lute.",
+      "actor": "art/troubadour.png", "voice": "audio/bard-welcome.wav",
+      "sendLabel": "Perform {n} →", "sendMessage": "An illustrated book is on its way to the town square.",
+      "sellsAll": true, "sellMessage": "The town square takes all {n} performances. +{total} coins."
+    }
+  ],
+  "strings": {
+    "openButton": "Open the guild",
+    "openMessage": "Brother Pip dips his quill. Your first story is underway.",
+    "openVoice": "audio/monk-welcome.wav",
+    "welcome": "A clean desk. A fresh pot of ink.",
+    "coins": "{n} coins",
+    "delivered": "{n} books sold",
+    "pause": "Pause",
+    "resume": "Resume",
+    "pausedMessage": "The candles are still.",
+    "resumedMessage": "The guild stirs back to life.",
+    "workerStatus": "♫ {n} {who} · {activity}",
+    "sellOne": "Sell +{price}",
+    "sellAll": "Sell all",
+    "hireButton": "{label}\n{cost} coins",
+    "recruit": "Recruit your guild",
+    "recruitClose": "✕ Close recruitment · swipe down",
+    "voicesReady": "Voices ready",
+    "voicesOff": "Voices off",
+    "voicePlaying": "Playing {name} greeting",
+    "voiceUnavailable": "Voice unavailable. Your guild still works silently.",
+    "workerSpeaks": "A guild member speaks.",
+    "voicesOffHint": "Turn voices on in Recruit to hear them.",
+    "goalStart": "Open your guild. Brother Pip has a story to tell.",
+    "goalPaused": "The guild is paused. Resume when you are ready.",
+    "goalFirstSale": "Collect a manuscript and sell it for your first 5 coins.",
+    "goalHire": [
+      "Save {cost} coins for an illuminator, or hire another monk for {firstCost}.",
+      "Illustrate a manuscript and save {cost} coins for a troubadour."
+    ],
+    "goalSendToLast": "Send an illustrated book to your troubadour.",
+    "goalSellLast": "Three crafts, one growing guild. Sell the performance or grow your team.",
+    "goalChainDone": "Three crafts, one growing guild. Sell another story or grow your team."
+  }
+}

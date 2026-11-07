@@ -1,57 +1,58 @@
-using System.Diagnostics;
+using System.ComponentModel;
+using Microsoft.Maui.Controls.Shapes;
 using Orbit.Engine;
-using Plugin.Maui.Audio;
+using ProseForge.Game.Themes;
+using ProseForge.Game.ViewModels;
 
 namespace ProseForge.Game;
 
+// The page only does what a view model can't: run the frame timer, lay out one row and one hire
+// button per station, and drive the Orbit scene. Everything else is bound.
 public partial class MainPage : ContentPage
 {
-    private readonly GuildGameState game;
-    private readonly GuildStateStore store;
+    private readonly GameViewModel model;
+    private readonly ThemeHost themes;
+    private readonly BookCatalogService catalogService;
     private readonly IGameSceneManager sceneManager;
-    private readonly IAudioManager audioManager;
     private readonly IDispatcherTimer timer;
-    private IAudioPlayer? audioPlayer;
-    private long lastTick;
-    private int saveTicks;
-    private bool recruitExpanded;
 
-    private void OnRecruitTabClicked(object? sender, EventArgs e)
-    {
-        recruitExpanded = !recruitExpanded;
-        RecruitPanel.IsVisible = recruitExpanded;
-        RecruitTabButton.Text = recruitExpanded ? "✕ Close recruitment · swipe down" : "Recruit your guild";
-        RecruitTabButton.BackgroundColor = Color.FromArgb(recruitExpanded ? "#A7824F" : "#34403C");
-        RecruitTabButton.TextColor = Color.FromArgb(recruitExpanded ? "#101A1B" : "#F7EEDC");
-    }
-
-    private void OnRecruitSwipeDown(object? sender, SwipedEventArgs e)
-    {
-        if (recruitExpanded) OnRecruitTabClicked(sender, EventArgs.Empty);
-    }
-
-    public MainPage(GuildGameState game, GuildStateStore store,
-        IGameSceneManager sceneManager, IAudioManager audioManager)
+    public MainPage(GameViewModel model, ThemeHost themes, BookCatalogService catalogService, IGameSceneManager sceneManager)
     {
         InitializeComponent();
-        this.game = game;
-        this.store = store;
+        this.model = model;
+        this.themes = themes;
+        this.catalogService = catalogService;
         this.sceneManager = sceneManager;
-        this.audioManager = audioManager;
+        BindingContext = model;
+        NavigationPage.SetHasNavigationBar(this, false);
+        LayOutStations(model.Stations.Count);
+        ThemeButton.IsVisible = themes.Choices.Count > 1;
         sceneManager.LoadScene<GuildHallScene>(GameView);
-        GameView.StartInteraction += OnGameViewStartInteraction;
+        model.PropertyChanged += OnModelChanged;
         timer = Dispatcher.CreateTimer();
         timer.Interval = TimeSpan.FromMilliseconds(100);
-        timer.Tick += OnTick;
-        Refresh();
+        timer.Tick += (_, _) => model.Frame();
+    }
+
+    // A theme decides how many stations there are; the grids follow.
+    private void LayOutStations(int count)
+    {
+        StationRows.RowDefinitions = [.. Enumerable.Range(0, count).Select(_ => new RowDefinition(GridLength.Star))];
+        HireColumns.ColumnDefinitions = [.. Enumerable.Range(0, count).Select(_ => new ColumnDefinition(GridLength.Star))];
+    }
+
+    private void OnModelChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(GameViewModel.Paused)) return;
+        if (model.Paused) sceneManager.Pause(); else sceneManager.Start();
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        lastTick = Stopwatch.GetTimestamp();
+        model.Resume();
         timer.Start();
-        if (!game.Paused) sceneManager.Start();
+        if (!model.Paused) sceneManager.Start();
     }
 
     protected override void OnDisappearing()
@@ -64,185 +65,104 @@ public partial class MainPage : ContentPage
     {
         timer.Stop();
         sceneManager.Pause();
-        game.PauseForBackground();
-        store.Save(game);
-        audioPlayer?.Pause();
-        Refresh();
+        model.PauseForBackground();
     }
 
     public void Foreground()
     {
-        lastTick = Stopwatch.GetTimestamp();
+        model.Resume();
         timer.Start();
-        if (!game.Paused) sceneManager.Start();
-        Refresh();
+        if (!model.Paused) sceneManager.Start();
     }
 
-    private void OnTick(object? sender, EventArgs e)
+    private async void OnAboutClicked(object? sender, EventArgs e) =>
+        await Navigation.PushAsync(new AboutPage(catalogService));
+
+    // The picker shows every bundled theme as a card; choosing one swaps the whole game in place.
+    private async void OnThemeClicked(object? sender, EventArgs e)
     {
-        var now = Stopwatch.GetTimestamp();
-        var elapsed = Stopwatch.GetElapsedTime(lastTick, now).TotalSeconds;
-        lastTick = now;
-        if (!game.CanAct) return;
-        game.Tick(elapsed);
-        if (++saveTicks >= 10)
+        model.OpenPicker();
+        PickerFrame.Stroke = Gilded(model.Theme.Palette);
+        ThemeCards.Children.Clear();
+        foreach (var choice in themes.Choices) ThemeCards.Children.Add(Card(choice));
+        PickerFrame.Opacity = 0;
+        PickerFrame.Scale = 0.94;
+        ThemePicker.IsVisible = true;
+        await Task.WhenAll(PickerFrame.FadeToAsync(1, 160), PickerFrame.ScaleToAsync(1, 160, Easing.CubicOut));
+    }
+
+    private void OnThemePickerClose(object? sender, EventArgs e)
+    {
+        ThemePicker.IsVisible = false;
+        model.ClosePicker();
+    }
+
+    private async void Pick(string id)
+    {
+        ThemePicker.IsVisible = false;
+        if (id == model.Theme.Id)
+            model.ClosePicker();
+        else if (themes.Switch(id) is { } problem)
         {
-            store.Save(game);
-            saveTicks = 0;
-        }
-        Refresh();
-        GameView.Invalidate();
-    }
-
-    private void OnGameViewStartInteraction(object? sender, TouchEventArgs e)
-    {
-        if (e.Touches.Length == 0 || !GuildHallScene.IsWorkbenchHit(
-            e.Touches[0], (float)GameView.Width, (float)GameView.Height))
-            return;
-        Collect();
-    }
-
-    private void Collect() => Perform(game.Collect, "Fresh manuscripts on your desk. Sell now, or make something richer.");
-    private void OnCollectClicked(object? sender, EventArgs e) => Collect();
-
-    private void OnOpenClicked(object? sender, EventArgs e)
-    {
-        if (Perform(game.Open, "Brother Pip dips his quill. Your first story is underway."))
-            _ = PlayVoiceAsync("monk-welcome-v1.wav");
-    }
-
-    private void OnPauseClicked(object? sender, EventArgs e)
-    {
-        if (!Perform(game.TogglePause, game.Paused ? "The candles are still." : "The guild stirs back to life."))
-            return;
-        if (game.Paused) sceneManager.Pause();
-        else sceneManager.Start();
-    }
-
-    private void OnSellPlainClicked(object? sender, EventArgs e) => Sell(0);
-    private void OnSellArtClicked(object? sender, EventArgs e) => Sell(1);
-    private void OnSellBardClicked(object? sender, EventArgs e)
-    {
-        var count = game.Stock[2];
-        Perform(game.SellAllPerformed, $"The town square takes all {count} performances. +{count * GuildGameState.Prices[2]} coins.");
-    }
-    private void Sell(int kind) => Perform(() => game.Sell(kind), $"A reader takes a story home. +{GuildGameState.Prices[kind]} coins.");
-
-    private void OnQueueArtClicked(object? sender, EventArgs e) =>
-        Perform(() => game.Queue(0), "A manuscript arrives at the illustration desk.");
-    private void OnQueueBardClicked(object? sender, EventArgs e) =>
-        Perform(() => game.Queue(1), "An illustrated book is on its way to the town square.");
-
-    private void OnHireMonkClicked(object? sender, EventArgs e) => Hire(0, "Another monk pulls up a chair.", "monk-welcome-v1.wav");
-    private void OnHireArtistClicked(object? sender, EventArgs e) => Hire(1, "The illuminator opens a box of pigments.", "artist-welcome-v1.wav");
-    private void OnHireBardClicked(object? sender, EventArgs e) => Hire(2, "The troubadour tunes a lute.", "bard-welcome-v1.wav");
-    private void Hire(int role, string message, string voice)
-    {
-        if (Perform(() => game.Hire(role), message))
-            _ = PlayVoiceAsync(voice);
-    }
-
-    private bool Perform(Func<bool> action, string message)
-    {
-        if (!action()) return false;
-        MessageLabel.Text = message;
-        store.Save(game);
-        lastTick = Stopwatch.GetTimestamp();
-        Refresh();
-        GameView.Invalidate();
-        return true;
-    }
-
-    private async Task PlayVoiceAsync(string asset)
-    {
-        if (!VoiceSwitch.IsToggled) return;
-        try
-        {
-            audioPlayer?.Dispose();
-            var stream = await FileSystem.OpenAppPackageFileAsync(asset);
-            audioPlayer = audioManager.CreatePlayer(stream);
-            audioPlayer.Play();
-            AudioStatusLabel.Text = $"Playing {asset.Split('-')[0]} greeting";
-        }
-        catch (Exception)
-        {
-            AudioStatusLabel.Text = "Voice unavailable. Your guild still works silently.";
+            model.ClosePicker();
+            await DisplayAlertAsync("That theme won't load", problem, "OK");
         }
     }
 
-    private void OnVoiceToggled(object? sender, ToggledEventArgs e)
+    // A frame in a theme's own metals: its accent, darkening to its panel edge and back, which
+    // reads as gold leaf on the guild's palette.
+    private static LinearGradientBrush Gilded(Themes.Palette p) => new(
+        [new GradientStop(Color.FromArgb(p.Accent), 0f), new GradientStop(Color.FromArgb(p.PanelStroke), 0.5f),
+         new GradientStop(Color.FromArgb(p.Accent), 1f)],
+        new Point(0, 0), new Point(1, 1));
+
+    private View Card(Themes.ThemeChoice choice)
     {
-        if (!e.Value) audioPlayer?.Pause();
-        AudioStatusLabel.Text = e.Value ? "Voices ready" : "Voices off";
+        var p = choice.Palette;
+        var current = choice.Id == model.Theme.Id;
+        var grid = new Grid { HeightRequest = 96 };
+        if (choice.Background != Themes.ThemePacks.MissingArt)
+            grid.Add(new Image { Source = Themes.AppThemes.Image(choice.Background), Aspect = Aspect.AspectFill, Opacity = 0.7 });
+        // A band of the theme's own panel colour keeps the title readable over any picture.
+        grid.Add(new BoxView
+        {
+            VerticalOptions = LayoutOptions.End, HeightRequest = 48,
+            Background = new LinearGradientBrush(
+                [new GradientStop(Colors.Transparent, 0f), new GradientStop(Color.FromArgb(p.Panel), 0.6f)],
+                new Point(0, 0), new Point(0, 1)),
+        });
+        grid.Add(new Label
+        {
+            Text = choice.Title, FontSize = 18, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb(p.Text),
+            VerticalOptions = LayoutOptions.End, Margin = new Thickness(14, 0, 14, 10),
+        });
+        if (current)
+            grid.Add(new Border
+            {
+                HorizontalOptions = LayoutOptions.End, VerticalOptions = LayoutOptions.Start, Margin = 10,
+                Padding = new Thickness(10, 3), StrokeThickness = 0, StrokeShape = new RoundRectangle { CornerRadius = 10 },
+                BackgroundColor = Color.FromArgb(p.Accent),
+                Content = new Label { Text = "Playing now", FontSize = 11, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb(p.OnAccent) },
+            });
+
+        var card = new Border
+        {
+            Content = grid, Padding = 0, StrokeThickness = current ? 5 : 3, Stroke = Gilded(p),
+            StrokeShape = new RoundRectangle { CornerRadius = 16 }, BackgroundColor = Color.FromArgb(p.Background),
+        };
+        card.GestureRecognizers.Add(new TapGestureRecognizer { Command = new Command(() => Pick(choice.Id)) });
+        SemanticProperties.SetDescription(card, current ? $"{choice.Title}, playing now" : $"Switch to {choice.Title}");
+        return card;
     }
 
-    private void OnMonkVoiceTapped(object? sender, TappedEventArgs e) => ReplayVoice(0, "monk-welcome-v1.wav");
-    private void OnArtistVoiceTapped(object? sender, TappedEventArgs e) => ReplayVoice(1, "artist-welcome-v1.wav");
-    private void OnBardVoiceTapped(object? sender, TappedEventArgs e) => ReplayVoice(2, "bard-welcome-v1.wav");
-
-    private void ReplayVoice(int role, string asset)
-    {
-        if (game.Workers[role] == 0) return;
-        MessageLabel.Text = VoiceSwitch.IsToggled ? "A guild member speaks." : "Turn voices on in Recruit to hear them.";
-        _ = PlayVoiceAsync(asset);
-    }
-
-    private void Refresh()
-    {
-        var active = game.CanAct;
-        CoinsLabel.Text = $"{game.Coins} coins";
-        SoldLabel.Text = $"{game.Sold} books sold";
-        OpenButton.IsVisible = !game.Started;
-        PauseButton.IsEnabled = game.Started;
-        PauseButton.Text = game.Paused ? "Resume" : "Pause";
-        CollectButton.Text = game.Ready > 0 ? $"Collect {game.Ready}" : "Quill at work…";
-        CollectButton.IsEnabled = active && game.Ready > 0;
-        MonkProgress.Progress = game.Progress[0] / GuildGameState.WorkSeconds[0];
-        ArtistProgress.Progress = game.Progress[1] / GuildGameState.WorkSeconds[1];
-        BardProgress.Progress = game.Progress[2] / GuildGameState.WorkSeconds[2];
-        PlainLabel.Text = $"Manuscripts: {game.Stock[0]}";
-        IllustratedLabel.Text = $"Illustrated: {game.Stock[1]}";
-        PerformedLabel.Text = $"Performed: {game.Stock[2]}";
-        SellPlainButton.IsEnabled = active && game.Stock[0] > 0;
-        SellArtButton.IsEnabled = active && game.Stock[1] > 0;
-        SellBardButton.IsEnabled = active && game.Stock[2] > 0;
-        SellBardButton.Text = "Sell all";
-        QueueArtButton.IsEnabled = active && game.Stock[0] > 0 && game.Workers[1] > 0;
-        QueueBardButton.IsEnabled = active && game.Stock[1] > 0 && game.Workers[2] > 0;
-        QueueArtButton.Text = $"Illustrate {Math.Min(game.Stock[0], game.Workers[1])} →";
-        QueueBardButton.Text = $"Perform {Math.Min(game.Stock[1], game.Workers[2])} →";
-        MonkLabel.Text = $"♫ {game.Workers[0]} monk{(game.Workers[0] == 1 ? "" : "s")} · writing";
-        ArtistLabel.Text = game.Workers[1] == 0 ? "Illuminator · empty workshop" : $"♫ {game.Workers[1]} illuminator{(game.Workers[1] == 1 ? "" : "s")} · illustrating";
-        BardLabel.Text = game.Workers[2] == 0 ? "Troubadour · empty alcove" : $"♫ {game.Workers[2]} troubadour{(game.Workers[2] == 1 ? "" : "s")} · performing";
-        ArtistActor.IsVisible = game.Workers[1] > 0;
-        BardActor.IsVisible = game.Workers[2] > 0;
-        SetHire(HireMonkButton, 0);
-        SetHire(HireArtistButton, 1);
-        SetHire(HireBardButton, 2);
-        GoalLabel.Text = !game.Started ? "Open your guild. Brother Pip has a story to tell."
-            : game.Paused ? "The guild is paused. Resume when you are ready."
-            : game.Sold == 0 ? "Collect a manuscript and sell it for your first 5 coins."
-            : game.Workers[1] == 0 ? "Save 30 coins for an illuminator, or hire another monk for 25."
-            : game.Workers[2] == 0 ? "Illustrate a manuscript and save 60 coins for a troubadour."
-            : game.CompletedChain ? "Three crafts, one growing guild. Sell another story or grow your team."
-            : game.Stock[2] == 0 ? "Send an illustrated book to your troubadour."
-            : "Three crafts, one growing guild. Sell the performance or grow your team.";
-    }
-
-    private void SetHire(Button button, int role)
-    {
-        var cost = game.HireCost(role);
-        button.IsEnabled = game.CanAct && game.Workers[role] < int.MaxValue && game.Coins >= cost;
-        button.Text = $"{new[] { "Monk", "Illuminator", "Troubadour" }[role]}\n{cost} coins";
-    }
+    private void OnRecruitSwipeDown(object? sender, SwipedEventArgs e) => model.RecruitOpen = false;
 
     protected override void OnHandlerChanging(HandlerChangingEventArgs args)
     {
         if (args.NewHandler is null)
         {
             timer.Stop();
-            GameView.StartInteraction -= OnGameViewStartInteraction;
-            audioPlayer?.Dispose();
+            model.PropertyChanged -= OnModelChanged;
         }
         base.OnHandlerChanging(args);
     }

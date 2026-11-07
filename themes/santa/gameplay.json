@@ -1,0 +1,16 @@
+{
+  "$schema": "../gameplay.schema.json",
+  "id": "santa",
+  "payout": "FinalStageOnly",
+  "tools": [
+    { "id": "tape", "starting": 1, "upgradeCost": 15 }
+  ],
+  "stations": [
+    { "id": "make", "secondsPerJob": 3, "hireCost": 20, "startingWorkers": 1, "handoff": "Automatic" },
+    { "id": "wrap", "secondsPerJob": 4, "hireCost": 25, "startingWorkers": 2, "handoff": "Automatic",
+      "needsTool": "tape" },
+    { "id": "deliver", "secondsPerJob": 2, "hireCost": 40, "startingWorkers": 1, "sellPrice": 4,
+      "batchSize": 3 }
+  ],
+  "goal": { "delivered": 100 }
+}

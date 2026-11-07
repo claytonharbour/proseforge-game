@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gameplay.schema.json",
+  "title": "One More Story gameplay",
+  "description": "A production line: the first station makes, each later one transforms.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "stations",
+    "payout"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "description": "Must match the theme id"
+    },
+    "payout": {
+      "enum": [
+        "AnyStage",
+        "FinalStageOnly"
+      ],
+      "description": "AnyStage: sell at any step. FinalStageOnly: only the last step earns."
+    },
+    "stations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "secondsPerJob",
+          "hireCost"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique in this line; saves are keyed by it"
+          },
+          "secondsPerJob": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "hireCost": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "First hire; each later hire costs another half of it"
+          },
+          "startingWorkers": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+          },
+          "sellPrice": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "What one finished item earns, if it can be sold"
+          },
+          "outputCap": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Finished work waiting here stops at this"
+          },
+          "collectByHand": {
+            "type": "boolean",
+            "description": "The player taps to gather finished work"
+          },
+          "handoff": {
+            "enum": [
+              "ByHand",
+              "Automatic"
+            ],
+            "default": "ByHand",
+            "description": "How finished work reaches the next station"
+          },
+          "batchSize": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1,
+            "description": "A load only leaves when this many are waiting"
+          },
+          "needsTool": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "A tool id: the step can't work more jobs at once than the tool allows"
+          }
+        }
+      }
+    },
+    "tools": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "starting",
+          "upgradeCost"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "starting": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "upgradeCost": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "goal": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "delivered"
+      ],
+      "properties": {
+        "delivered": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

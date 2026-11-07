@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Every colour is a palette role, so About wears the theme chosen on the main screen. -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:ProseForge.Game"
+             x:Class="ProseForge.Game.AboutPage"
+             x:DataType="local:AboutPage"
+             Title="About One More Story"
+             BackgroundColor="{DynamicResource Background}">
+    <CollectionView ItemsSource="{Binding Books}" SelectionMode="None" MaximumWidthRequest="600" Margin="16,0">
+        <CollectionView.Header>
+            <VerticalStackLayout Spacing="14" Padding="0,16,0,6">
+                <!-- The author, with his picture. Tapping it opens his books page on claytonharbour.com. -->
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14"
+                      SemanticProperties.Description="Clayton Harbour. Opens claytonharbour.com/books">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAuthorTapped" />
+                    </Grid.GestureRecognizers>
+                    <Border WidthRequest="68" HeightRequest="68" StrokeShape="Ellipse" StrokeThickness="3"
+                            Stroke="{DynamicResource Accent}" VerticalOptions="Center">
+                        <Image Source="clayton.png" Aspect="AspectFill"
+                               SemanticProperties.Description="Clayton Harbour" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                        <Label Text="Clayton Harbour" FontSize="20" FontAttributes="Bold" TextColor="{DynamicResource Accent}" />
+                        <Label Text="Books, games and a team of AI agents at ProseForge." FontSize="12"
+                               TextColor="{DynamicResource Text}" />
+                        <Label Text="claytonharbour.com/books ↗" FontSize="12" TextDecorations="Underline"
+                               TextColor="{DynamicResource Accent}" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- The book about making this game: always shown in full, with its cover. -->
+                <Border BackgroundColor="{DynamicResource Panel}" Stroke="{DynamicResource Accent}" StrokeThickness="2"
+                        StrokeShape="RoundRectangle 12" Padding="12">
+                    <Grid ColumnDefinitions="96,*" ColumnSpacing="12">
+                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 4" VerticalOptions="Start">
+                            <Image Source="gamebook_cover.png" Aspect="AspectFill" HeightRequest="144"
+                                   SemanticProperties.Description="Cover of A Claude Agent and a Codex Agent Walk Into a Room" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="5">
+                            <Label Text="THE BOOK BEHIND THE GAME" FontSize="10" CharacterSpacing="1.5"
+                                   TextColor="{DynamicResource Accent}" />
+                            <Label Text="{x:Static local:AboutPage.GameBookTitle}" FontSize="16" FontAttributes="Bold"
+                                   TextColor="{DynamicResource Text}" />
+                            <Label Text="{x:Static local:AboutPage.GameBookDescription}" FontSize="12"
+                                   TextColor="{DynamicResource MutedText}" />
+                            <Label x:Name="FeaturedStatus" Text="Coming soon." FontSize="11" FontAttributes="Italic"
+                                   TextColor="{DynamicResource MutedText}" />
+                            <Button x:Name="FeaturedLink" Text="See more ↗" IsVisible="False" Clicked="OnFeaturedClicked"
+                                    BackgroundColor="{DynamicResource Accent}" TextColor="{DynamicResource OnAccent}"
+                                    FontSize="12" HorizontalOptions="Start" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="Books by Clayton Harbour" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource Text}" />
+                        <Label x:Name="SourceLabel" Text="Loading books…" FontSize="11" TextColor="{DynamicResource MutedText}" />
+                    </VerticalStackLayout>
+                    <Label Grid.Column="1" Text="Compact" FontSize="12" VerticalOptions="Center"
+                           TextColor="{DynamicResource MutedText}" />
+                    <Switch Grid.Column="2" IsToggled="{Binding Compact}" OnColor="{DynamicResource Accent}"
+                            VerticalOptions="Center" SemanticProperties.Description="Compact list: hide book covers" />
+                </Grid>
+            </VerticalStackLayout>
+        </CollectionView.Header>
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="local:BookCard">
+                <Border BackgroundColor="{DynamicResource Panel}" Stroke="{DynamicResource PanelStroke}"
+                        StrokeShape="RoundRectangle 10" Padding="10" Margin="0,0,0,8">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 4" VerticalOptions="Start"
+                                IsVisible="{Binding ShowCover}">
+                            <Image Source="{Binding Cover}" Aspect="AspectFill" WidthRequest="64" HeightRequest="96"
+                                   SemanticProperties.Description="{Binding CoverDescription}" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                            <Label Text="{Binding Book.Title}" FontSize="14" FontAttributes="Bold" TextColor="{DynamicResource Text}" />
+                            <Label Text="{Binding Book.Tagline}" FontSize="11" TextColor="{DynamicResource MutedText}"
+                                   MaxLines="{Binding TaglineLines}" LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="4" VerticalOptions="Center">
+                            <Button Text="See more ↗" FontSize="11" Padding="7,0"
+                                    IsVisible="{Binding Book.HasStoreUrl}" CommandParameter="{Binding Book.StoreUrl}"
+                                    Clicked="OnBookClicked" BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Accent}" />
+                            <Button Text="★ Review" FontSize="10" Padding="6,0" MinimumHeightRequest="28"
+                                    IsVisible="{Binding Book.HasReviewUrl}" CommandParameter="{Binding Book.ReviewUrl}"
+                                    SemanticProperties.Description="Write a review on Amazon"
+                                    Clicked="OnBookClicked" BackgroundColor="Transparent"
+                                    BorderColor="{DynamicResource PanelStroke}" BorderWidth="1" TextColor="{DynamicResource Accent}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
+</ContentPage>

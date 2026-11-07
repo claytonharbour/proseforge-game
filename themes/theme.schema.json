@@ -1,0 +1,405 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "theme.schema.json",
+  "title": "One More Story theme",
+  "description": "What a theme looks and sounds like. The rules are in the gameplay file it names.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "license",
+    "gameplay",
+    "background",
+    "palette",
+    "stations",
+    "strings"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Must match the pack's folder name"
+    },
+    "title": {
+      "type": "string",
+      "description": "Shown at the top of the screen"
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Who owns this pack and how it may be reused"
+    },
+    "gameplay": {
+      "type": "string",
+      "description": "The rules file in this pack, usually gameplay.json"
+    },
+    "background": {
+      "type": "string",
+      "description": "Full-screen picture behind the game (a path in this pack). Portrait 9:16, 1080×1920 recommended; it is scaled to fill the screen and cropped at the sides on wider phones. The top fifth sits under the header. The screen below is split into one equal band per station, each with a 60-point bar along its bottom edge, so put each station's character in its band, above its bar."
+    },
+    "palette": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "background",
+        "header",
+        "panel",
+        "panelStroke",
+        "accent",
+        "onAccent",
+        "text",
+        "mutedText",
+        "button",
+        "buttonActive",
+        "dock",
+        "dockStroke"
+      ],
+      "properties": {
+        "background": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+          "description": "#RRGGBB, or #AARRGGBB for transparency"
+        },
+        "header": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+          "description": "#RRGGBB, or #AARRGGBB for transparency"
+        },
+        "panel": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+          "description": "#RRGGBB, or #AARRGGBB for transparency"
+        },
+        "panelStroke": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+          "description": "#RRGGBB, or #AARRGGBB for transparency"
+        },
+        "accent": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+          "description": "#RRGGBB, or #AARRGGBB for transparency"
+        },
+        "onAccent": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+          "description": "#RRGGBB, or #AARRGGBB for transparency"
+        },
+        "text": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+          "description": "#RRGGBB, or #AARRGGBB for transparency"
+        },
+        "mutedText": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+          "description": "#RRGGBB, or #AARRGGBB for transparency"
+        },
+        "button": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+          "description": "#RRGGBB, or #AARRGGBB for transparency"
+        },
+        "buttonActive": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+          "description": "#RRGGBB, or #AARRGGBB for transparency"
+        },
+        "dock": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+          "description": "#RRGGBB, or #AARRGGBB for transparency"
+        },
+        "dockStroke": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+          "description": "#RRGGBB, or #AARRGGBB for transparency"
+        }
+      }
+    },
+    "stations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "worker",
+          "workers",
+          "activity",
+          "empty",
+          "stockLabel",
+          "hireLabel",
+          "hireMessage"
+        ],
+        "properties": {
+          "worker": {
+            "type": "string",
+            "description": "One worker: \"monk\""
+          },
+          "workers": {
+            "type": "string",
+            "description": "Several: \"monks\""
+          },
+          "activity": {
+            "type": "string",
+            "description": "What they're doing: \"writing\""
+          },
+          "empty": {
+            "type": "string",
+            "description": "Shown before anyone is hired here"
+          },
+          "stockLabel": {
+            "type": "string",
+            "description": "Finished work here, e.g. \"Manuscripts: {n}\"; {waiting} is the queue in front of this step, {tools} its shared tool"
+          },
+          "hireLabel": {
+            "type": "string",
+            "description": "Name on the hire button"
+          },
+          "hireMessage": {
+            "type": "string",
+            "description": "Said when someone is hired"
+          },
+          "actor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Picture shown once someone works here (a path in this pack)"
+          },
+          "voice": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Sound played on hire and when the worker is tapped (a path in this pack)"
+          },
+          "collectLabel": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Needed if the station is collected by hand: \"Collect {n}\""
+          },
+          "idleLabel": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Shown while nothing is ready to collect"
+          },
+          "collectMessage": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Said when work is collected"
+          },
+          "sendLabel": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Needed if the station before hands work on by hand: \"Illustrate {n} →\""
+          },
+          "sendMessage": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Said when work is sent here"
+          },
+          "sellsAll": {
+            "type": "boolean",
+            "description": "One button sells everything finished here"
+          },
+          "sellMessage": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Said on a sale: {price}, or {n} and {total} when selling all"
+          },
+          "toolLabel": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Needed if the station needs a shared tool: the button that buys one more, e.g. \"+1 tape · {cost}\"; {n} is how many there are"
+          },
+          "toolMessage": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Said when one more of the tool is bought"
+          }
+        }
+      },
+      "description": "One per station in gameplay.json, in the same order"
+    },
+    "strings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "openButton",
+        "openMessage",
+        "welcome",
+        "coins",
+        "delivered",
+        "pause",
+        "resume",
+        "pausedMessage",
+        "resumedMessage",
+        "workerStatus",
+        "sellOne",
+        "sellAll",
+        "hireButton",
+        "recruit",
+        "recruitClose",
+        "voicesReady",
+        "voicesOff",
+        "voicePlaying",
+        "voiceUnavailable",
+        "workerSpeaks",
+        "voicesOffHint",
+        "goalStart",
+        "goalPaused",
+        "goalFirstSale",
+        "goalHire",
+        "goalSendToLast",
+        "goalSellLast",
+        "goalChainDone"
+      ],
+      "properties": {
+        "openButton": {
+          "type": "string",
+          "description": "openButton"
+        },
+        "openMessage": {
+          "type": "string",
+          "description": "openMessage"
+        },
+        "welcome": {
+          "type": "string",
+          "description": "welcome"
+        },
+        "coins": {
+          "type": "string",
+          "description": "coins"
+        },
+        "delivered": {
+          "type": "string",
+          "description": "delivered"
+        },
+        "pause": {
+          "type": "string",
+          "description": "pause"
+        },
+        "resume": {
+          "type": "string",
+          "description": "resume"
+        },
+        "pausedMessage": {
+          "type": "string",
+          "description": "pausedMessage"
+        },
+        "resumedMessage": {
+          "type": "string",
+          "description": "resumedMessage"
+        },
+        "workerStatus": {
+          "type": "string",
+          "description": "workerStatus"
+        },
+        "sellOne": {
+          "type": "string",
+          "description": "sellOne"
+        },
+        "sellAll": {
+          "type": "string",
+          "description": "sellAll"
+        },
+        "hireButton": {
+          "type": "string",
+          "description": "hireButton"
+        },
+        "recruit": {
+          "type": "string",
+          "description": "recruit"
+        },
+        "recruitClose": {
+          "type": "string",
+          "description": "recruitClose"
+        },
+        "voicesReady": {
+          "type": "string",
+          "description": "voicesReady"
+        },
+        "voicesOff": {
+          "type": "string",
+          "description": "voicesOff"
+        },
+        "voicePlaying": {
+          "type": "string",
+          "description": "voicePlaying"
+        },
+        "voiceUnavailable": {
+          "type": "string",
+          "description": "voiceUnavailable"
+        },
+        "workerSpeaks": {
+          "type": "string",
+          "description": "workerSpeaks"
+        },
+        "voicesOffHint": {
+          "type": "string",
+          "description": "voicesOffHint"
+        },
+        "goalStart": {
+          "type": "string",
+          "description": "goalStart"
+        },
+        "goalPaused": {
+          "type": "string",
+          "description": "goalPaused"
+        },
+        "goalFirstSale": {
+          "type": "string",
+          "description": "goalFirstSale"
+        },
+        "goalHire": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "One hint per station after the first: what to save for next. {cost} and {firstCost} are filled in."
+        },
+        "goalSendToLast": {
+          "type": "string",
+          "description": "goalSendToLast"
+        },
+        "goalSellLast": {
+          "type": "string",
+          "description": "goalSellLast"
+        },
+        "goalChainDone": {
+          "type": "string",
+          "description": "goalChainDone"
+        },
+        "openVoice": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Sound played when the game is opened (a path in this pack)"
+        }
+      }
+    }
+  }
+}

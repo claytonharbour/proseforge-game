@@ -1,0 +1,37 @@
+{
+  "$schema": "../gameplay.schema.json",
+  "id": "bakery",
+  "payout": "AnyStage",
+  "tools": [
+    {
+      "id": "oven",
+      "starting": 1,
+      "upgradeCost": 40
+    }
+  ],
+  "stations": [
+    {
+      "id": "mix",
+      "secondsPerJob": 3,
+      "hireCost": 20,
+      "startingWorkers": 1,
+      "sellPrice": 2,
+      "outputCap": 20,
+      "collectByHand": true
+    },
+    {
+      "id": "bake",
+      "secondsPerJob": 6,
+      "hireCost": 30,
+      "sellPrice": 6,
+      "batchSize": 6,
+      "needsTool": "oven"
+    },
+    {
+      "id": "counter",
+      "secondsPerJob": 5,
+      "hireCost": 50,
+      "sellPrice": 14
+    }
+  ]
+}

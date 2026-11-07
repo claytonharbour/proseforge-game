@@ -1,0 +1,11 @@
+{
+  "$schema": "../gameplay.schema.json",
+  "id": "guild",
+  "payout": "AnyStage",
+  "stations": [
+    { "id": "write", "secondsPerJob": 4, "hireCost": 25, "startingWorkers": 1, "sellPrice": 5,
+      "outputCap": 20, "collectByHand": true },
+    { "id": "illustrate", "secondsPerJob": 6, "hireCost": 30, "sellPrice": 12 },
+    { "id": "perform", "secondsPerJob": 8, "hireCost": 60, "sellPrice": 24 }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "$schema": "../theme.schema.json",
+  "id": "rocket-yard",
+  "title": "ROCKET YARD",
+  "license": "Copyright Clayton Harbour. Candidate pack: draft words; art to be CC BY 4.0 if chosen for the public release.",
+  "gameplay": "gameplay.json",
+  "background": "art/background.png",
+  "palette": {
+    "background": "#0E1420",
+    "header": "#E50E1420",
+    "panel": "#D9182233",
+    "panelStroke": "#5FB3E0",
+    "accent": "#FF8A3D",
+    "onAccent": "#26110A",
+    "text": "#EEF4FA",
+    "mutedText": "#B8C7D6",
+    "button": "#22314A",
+    "buttonActive": "#5FB3E0",
+    "dock": "#F00E1420",
+    "dockStroke": "#3C5A7A"
+  },
+  "stations": [
+    {
+      "worker": "machinist",
+      "workers": "machinists",
+      "activity": "machining parts",
+      "empty": "Workshop · lathe off",
+      "stockLabel": "Parts made",
+      "hireLabel": "Machinist",
+      "hireMessage": "Another machinist clocks in.",
+      "actor": "art/machinist.png"
+    },
+    {
+      "worker": "engineer",
+      "workers": "engineers",
+      "activity": "assembling",
+      "empty": "Hangar · empty",
+      "stockLabel": "Modules waiting: {waiting}",
+      "hireLabel": "Engineer",
+      "hireMessage": "Another engineer grabs a wrench.",
+      "actor": "art/engineer.png"
+    },
+    {
+      "worker": "flight",
+      "workers": "flight crews",
+      "activity": "launching",
+      "empty": "Pad · no crew",
+      "stockLabel": "On the pad: {waiting} / 10",
+      "hireLabel": "Flight crew",
+      "hireMessage": "Another flight crew suits up.",
+      "actor": "art/flight.png"
+    }
+  ],
+  "strings": {
+    "openVoice": null,
+    "coins": "{n} coins",
+    "pause": "Pause",
+    "resume": "Resume",
+    "workerStatus": "{n} {who} · {activity}",
+    "sellOne": "Sell +{price}",
+    "sellAll": "Sell all",
+    "hireButton": "{label}\n{cost} coins",
+    "voicesReady": "Voices ready",
+    "voicesOff": "Voices off",
+    "voicePlaying": "Playing {name}",
+    "voiceUnavailable": "No voices in this pack yet.",
+    "workerSpeaks": "A worker speaks.",
+    "voicesOffHint": "Turn voices on to hear them.",
+    "openButton": "Start the countdown",
+    "openMessage": "Lathes spin up. The first parts come off the line.",
+    "welcome": "An empty pad and a long countdown.",
+    "delivered": "{n} payloads in orbit",
+    "pausedMessage": "Countdown held.",
+    "resumedMessage": "Countdown resumes.",
+    "recruit": "Hire crew",
+    "recruitClose": "✕ Close · swipe down",
+    "goalStart": "Start the countdown.",
+    "goalPaused": "Countdown held. Resume when you're ready.",
+    "goalFirstSale": "Fill the pad: ten modules make a launch, and a launch pays.",
+    "goalHire": [
+      "Modules stacking up? Save {cost} coins for another engineer.",
+      "Save {cost} coins for a second flight crew."
+    ],
+    "goalSendToLast": "Keep modules flowing to the pad.",
+    "goalSellLast": "Watch the pad fill.",
+    "goalChainDone": "Launches are routine now. Find the next bottleneck."
+  }
+}

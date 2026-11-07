@@ -1,0 +1,32 @@
+{
+  "$schema": "../gameplay.schema.json",
+  "id": "rocket-yard",
+  "payout": "FinalStageOnly",
+  "stations": [
+    {
+      "id": "parts",
+      "secondsPerJob": 2,
+      "hireCost": 20,
+      "startingWorkers": 1,
+      "handoff": "Automatic"
+    },
+    {
+      "id": "assemble",
+      "secondsPerJob": 3,
+      "hireCost": 30,
+      "startingWorkers": 1,
+      "handoff": "Automatic"
+    },
+    {
+      "id": "launch",
+      "secondsPerJob": 5,
+      "hireCost": 80,
+      "startingWorkers": 1,
+      "sellPrice": 4,
+      "batchSize": 10
+    }
+  ],
+  "goal": {
+    "delivered": 200
+  }
+}

@@ -1,91 +1,135 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!-- Every colour is a DynamicResource named after a palette role, and every word and picture is
+     bound from the theme, so a different theme repaints and renames this page in place. -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:engine="clr-namespace:Orbit.Engine;assembly=Orbit.Engine"
+             xmlns:vm="clr-namespace:ProseForge.Game.ViewModels"
              x:Class="ProseForge.Game.MainPage"
-             Title="One More Story" BackgroundColor="#101A1B">
+             x:DataType="vm:GameViewModel"
+             Title="One More Story" BackgroundColor="{DynamicResource Background}">
     <Grid RowDefinitions="Auto,*" RowSpacing="0" MaximumWidthRequest="600">
-        <Image Grid.RowSpan="2" Source="guild_hall_v1.png" Aspect="AspectFill" Opacity="0.9" />
+        <Image Grid.RowSpan="2" Source="{Binding BackgroundImage}" Aspect="AspectFill" Opacity="0.9" />
 
-        <Border Grid.Row="0" BackgroundColor="#E5101A1B" StrokeThickness="0" Padding="12,8">
-            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
-                <Label Text="ONE MORE STORY" FontSize="17" FontAttributes="Bold" TextColor="#F7EEDC" />
-                <Label x:Name="CoinsLabel" Grid.Column="1" Text="0 coins" FontSize="17" TextColor="#EDB96B" />
-                <Label x:Name="GoalLabel" Grid.Row="1" Grid.ColumnSpan="2" Text="Open your guild." FontSize="11" TextColor="#F7EEDC" MaxLines="2" />
-                <Label x:Name="MessageLabel" Grid.Row="2" Grid.ColumnSpan="2" Text="A clean desk. A fresh pot of ink." FontSize="10" TextColor="#D2D8C5" MaxLines="1" />
+        <!-- Sizes here are ScreenLayout's (Themes/ScreenLayout.cs), which the art guide is drawn from. -->
+        <Border Grid.Row="0" HeightRequest="92" BackgroundColor="{DynamicResource Header}" StrokeThickness="0" Padding="12,8">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8">
+                <Label Text="{Binding Title}" FontSize="17" FontAttributes="Bold" TextColor="{DynamicResource Text}"
+                       MaxLines="1" LineBreakMode="TailTruncation" />
+                <Label Grid.Column="1" Text="{Binding Coins}" FontSize="17" TextColor="{DynamicResource Accent}" />
+                <Button x:Name="ThemeButton" Grid.Column="2" Text="Theme" FontSize="11" HeightRequest="30" Padding="6,0"
+                        Clicked="OnThemeClicked" SemanticProperties.Hint="Switch to another theme; each keeps its own game"
+                        BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}" />
+                <Button Grid.Column="3" Text="About" FontSize="11" HeightRequest="30" Padding="6,0" Clicked="OnAboutClicked"
+                        BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}" />
+                <Label Grid.Row="1" Grid.ColumnSpan="4" Text="{Binding Goal}" FontSize="11" TextColor="{DynamicResource Text}" MaxLines="2" />
+                <Label Grid.Row="2" Grid.ColumnSpan="4" Text="{Binding Message}" FontSize="10" TextColor="{DynamicResource MutedText}" MaxLines="1" />
             </Grid>
         </Border>
 
-        <Grid Grid.Row="1" RowDefinitions="*,*,*" Padding="10,4,10,112" RowSpacing="5">
-            <Border Grid.Row="0" VerticalOptions="End" BackgroundColor="#D9182320" Stroke="#A7824F" StrokeShape="RoundRectangle 8" Padding="6,2">
-                <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,2" ColumnSpacing="4" RowSpacing="1">
-                    <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                        <Label x:Name="MonkLabel" Text="♫ 1 monk · writing" FontSize="10" TextColor="#EDB96B">
-                            <Label.GestureRecognizers><TapGestureRecognizer Tapped="OnMonkVoiceTapped" /></Label.GestureRecognizers>
-                        </Label>
-                        <Label x:Name="PlainLabel" Text="Manuscripts: 0" FontSize="9" TextColor="#F7EEDC" />
-                    </VerticalStackLayout>
-                    <Button x:Name="CollectButton" Grid.Column="1" Text="Collect" FontSize="10" HeightRequest="28" Padding="4,0" Clicked="OnCollectClicked" BackgroundColor="#EDB96B" TextColor="#26251D" />
-                    <Button x:Name="SellPlainButton" Grid.Column="2" Text="Sell +5" FontSize="10" HeightRequest="28" Padding="4,0" Clicked="OnSellPlainClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
-                    <ProgressBar x:Name="MonkProgress" Grid.Row="1" Grid.ColumnSpan="3" HeightRequest="2" ProgressColor="#EDB96B" />
-                </Grid>
-            </Border>
-            <Image x:Name="ArtistActor" Grid.Row="1" Source="illuminator_v1.png" Aspect="AspectFit" WidthRequest="175" HeightRequest="175" HorizontalOptions="End" VerticalOptions="Center" Margin="0,-12,22,0" IsVisible="False">
-                <Image.GestureRecognizers><TapGestureRecognizer Tapped="OnArtistVoiceTapped" /></Image.GestureRecognizers>
-            </Image>
-            <Border Grid.Row="1" VerticalOptions="End" BackgroundColor="#D9182320" Stroke="#A7824F" StrokeShape="RoundRectangle 8" Padding="6,2">
-                <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,2" ColumnSpacing="4" RowSpacing="1">
-                    <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                        <Label x:Name="ArtistLabel" Text="Illuminator · empty" FontSize="10" TextColor="#EDB96B">
-                            <Label.GestureRecognizers><TapGestureRecognizer Tapped="OnArtistVoiceTapped" /></Label.GestureRecognizers>
-                        </Label>
-                        <Label x:Name="IllustratedLabel" Text="Illustrated: 0" FontSize="9" TextColor="#F7EEDC" />
-                    </VerticalStackLayout>
-                    <Button x:Name="QueueArtButton" Grid.Column="1" Text="Illustrate →" FontSize="10" HeightRequest="28" Padding="4,0" Clicked="OnQueueArtClicked" BackgroundColor="#EDB96B" TextColor="#26251D" />
-                    <Button x:Name="SellArtButton" Grid.Column="2" Text="Sell +12" FontSize="10" HeightRequest="28" Padding="4,0" Clicked="OnSellArtClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
-                    <ProgressBar x:Name="ArtistProgress" Grid.Row="1" Grid.ColumnSpan="3" HeightRequest="2" ProgressColor="#EDB96B" />
-                </Grid>
-            </Border>
-            <Image x:Name="BardActor" Grid.Row="2" Source="troubadour_v1.png" Aspect="AspectFit" WidthRequest="170" HeightRequest="170" HorizontalOptions="End" VerticalOptions="Center" Margin="0,-10,25,0" IsVisible="False">
-                <Image.GestureRecognizers><TapGestureRecognizer Tapped="OnBardVoiceTapped" /></Image.GestureRecognizers>
-            </Image>
-            <Border Grid.Row="2" VerticalOptions="End" BackgroundColor="#D9182320" Stroke="#A7824F" StrokeShape="RoundRectangle 8" Padding="6,2">
-                <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,2" ColumnSpacing="4" RowSpacing="1">
-                    <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                        <Label x:Name="BardLabel" Text="Troubadour · empty" FontSize="10" TextColor="#EDB96B">
-                            <Label.GestureRecognizers><TapGestureRecognizer Tapped="OnBardVoiceTapped" /></Label.GestureRecognizers>
-                        </Label>
-                        <Label x:Name="PerformedLabel" Text="Performed: 0" FontSize="9" TextColor="#F7EEDC" />
-                    </VerticalStackLayout>
-                    <Button x:Name="QueueBardButton" Grid.Column="1" Text="Perform →" FontSize="10" HeightRequest="28" Padding="4,0" Clicked="OnQueueBardClicked" BackgroundColor="#EDB96B" TextColor="#26251D" />
-                    <Button x:Name="SellBardButton" Grid.Column="2" Text="Sell +24" FontSize="10" HeightRequest="28" Padding="4,0" Clicked="OnSellBardClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
-                    <ProgressBar x:Name="BardProgress" Grid.Row="1" Grid.ColumnSpan="3" HeightRequest="2" ProgressColor="#EDB96B" />
-                </Grid>
-            </Border>
-            <engine:GameSceneView x:Name="GameView" IsVisible="False" HeightRequest="1" WidthRequest="1" />
+        <!-- One row per station, however many the theme's line has. Every row's bar is the same fixed
+             height in every theme, buttons or not, so packs differ in art and words, not in layout. -->
+        <Grid x:Name="StationRows" Grid.Row="1" Padding="10,4,10,112" RowSpacing="5"
+              BindableLayout.ItemsSource="{Binding Stations}">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="vm:StationViewModel">
+                    <Grid Grid.Row="{Binding Index}">
+                        <Image Source="{Binding ActorImage}" IsVisible="{Binding ActorVisible}" Aspect="AspectFit"
+                               WidthRequest="172" HeightRequest="172" HorizontalOptions="End" VerticalOptions="Center" Margin="0,0,24,0">
+                            <Image.GestureRecognizers><TapGestureRecognizer Command="{Binding SpeakCommand}" /></Image.GestureRecognizers>
+                        </Image>
+                        <Border VerticalOptions="End" HeightRequest="60" BackgroundColor="{DynamicResource Panel}"
+                                Stroke="{DynamicResource PanelStroke}" StrokeShape="RoundRectangle 8" Padding="6,2">
+                            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="*,2" ColumnSpacing="4" RowSpacing="1">
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                    <Label Text="{Binding Status}" FontSize="10" TextColor="{DynamicResource Accent}">
+                                        <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SpeakCommand}" /></Label.GestureRecognizers>
+                                    </Label>
+                                    <Label Text="{Binding Stock}" FontSize="9" TextColor="{DynamicResource Text}" />
+                                </VerticalStackLayout>
+                                <Button Grid.Column="1" Text="{Binding PrimaryText}" Command="{Binding PrimaryCommand}"
+                                        IsVisible="{Binding PrimaryVisible}" IsEnabled="{Binding PrimaryEnabled}"
+                                        FontSize="10" HeightRequest="28" Padding="4,0"
+                                        BackgroundColor="{DynamicResource Accent}" TextColor="{DynamicResource OnAccent}" />
+                                <Button Grid.Column="2" Text="{Binding SellText}" Command="{Binding SellCommand}"
+                                        IsVisible="{Binding SellVisible}" IsEnabled="{Binding SellEnabled}"
+                                        FontSize="10" HeightRequest="28" Padding="4,0"
+                                        BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}" />
+                                <ProgressBar Grid.Row="1" Grid.ColumnSpan="3" HeightRequest="2" Progress="{Binding Progress}"
+                                             ProgressColor="{DynamicResource Accent}" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
         </Grid>
+        <engine:GameSceneView x:Name="GameView" Grid.Row="1" IsVisible="False" HeightRequest="1" WidthRequest="1" />
 
-        <Border Grid.Row="1" VerticalOptions="End" BackgroundColor="#F0101A1B" Stroke="#786448" StrokeShape="RoundRectangle 12" Padding="10,6" Margin="6,0,6,6">
+        <Border Grid.Row="1" VerticalOptions="End" BackgroundColor="{DynamicResource Dock}" Stroke="{DynamicResource DockStroke}"
+                StrokeShape="RoundRectangle 12" Padding="10,6" Margin="6,0,6,6">
             <VerticalStackLayout Spacing="4">
                 <Grid ColumnDefinitions="*,Auto">
-                    <Label x:Name="SoldLabel" Text="0 books sold" FontSize="11" TextColor="#D2D8C5" VerticalOptions="Center" />
-                    <Button x:Name="PauseButton" Grid.Column="1" Text="Pause" FontSize="11" HeightRequest="32" Padding="9,0" Clicked="OnPauseClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
+                    <Label Text="{Binding Delivered}" FontSize="11" TextColor="{DynamicResource MutedText}" VerticalOptions="Center" />
+                    <Button Grid.Column="1" Text="{Binding PauseText}" Command="{Binding PauseCommand}" IsEnabled="{Binding Started}"
+                            FontSize="11" HeightRequest="32" Padding="9,0"
+                            BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}" />
                 </Grid>
-                <Button x:Name="OpenButton" Text="Open the guild" FontSize="13" HeightRequest="38" Clicked="OnOpenClicked" BackgroundColor="#EDB96B" TextColor="#26251D" />
-                <Button x:Name="RecruitTabButton" Text="Recruit your guild" FontSize="11" HeightRequest="32" Clicked="OnRecruitTabClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
-                <VerticalStackLayout x:Name="RecruitPanel" IsVisible="False" Spacing="2">
-                    <VerticalStackLayout.GestureRecognizers><SwipeGestureRecognizer Direction="Down" Swiped="OnRecruitSwipeDown" /></VerticalStackLayout.GestureRecognizers>
-                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="3">
-                        <Button x:Name="HireMonkButton" Text="Monk&#10;25 coins" FontSize="10" HeightRequest="48" Padding="2,0" Clicked="OnHireMonkClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
-                        <Button x:Name="HireArtistButton" Grid.Column="1" Text="Illuminator&#10;30 coins" FontSize="10" HeightRequest="48" Padding="2,0" Clicked="OnHireArtistClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
-                        <Button x:Name="HireBardButton" Grid.Column="2" Text="Troubadour&#10;60 coins" FontSize="10" HeightRequest="48" Padding="2,0" Clicked="OnHireBardClicked" BackgroundColor="#34403C" TextColor="#F7EEDC" />
+                <Button Text="{Binding OpenText}" Command="{Binding OpenCommand}" IsVisible="{Binding ShowOpen}"
+                        FontSize="13" HeightRequest="38" BackgroundColor="{DynamicResource Accent}" TextColor="{DynamicResource OnAccent}" />
+                <Button Text="{Binding RecruitText}" Command="{Binding RecruitCommand}" FontSize="11" HeightRequest="32"
+                        BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding RecruitOpen}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{DynamicResource ButtonActive}" />
+                            <Setter Property="TextColor" Value="{DynamicResource Background}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <VerticalStackLayout IsVisible="{Binding RecruitOpen}" Spacing="2">
+                    <VerticalStackLayout.GestureRecognizers>
+                        <SwipeGestureRecognizer Direction="Down" Swiped="OnRecruitSwipeDown" />
+                    </VerticalStackLayout.GestureRecognizers>
+                    <Grid x:Name="HireColumns" ColumnSpacing="3" BindableLayout.ItemsSource="{Binding Stations}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:StationViewModel">
+                                <Button Grid.Column="{Binding Index}" Text="{Binding HireText}" Command="{Binding HireCommand}"
+                                        IsEnabled="{Binding HireEnabled}" FontSize="10" HeightRequest="48" Padding="2,0" LineBreakMode="WordWrap"
+                                        BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}" />
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
                     </Grid>
                     <HorizontalStackLayout Spacing="4">
-                        <Switch x:Name="VoiceSwitch" IsToggled="True" Toggled="OnVoiceToggled" Scale="0.7" />
-                        <Label x:Name="AudioStatusLabel" Text="Voices ready" FontSize="10" TextColor="#D2D8C5" VerticalOptions="Center" />
+                        <Switch IsToggled="{Binding VoicesOn}" Scale="0.7" />
+                        <Label Text="{Binding AudioStatus}" FontSize="10" TextColor="{DynamicResource MutedText}" VerticalOptions="Center" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
             </VerticalStackLayout>
         </Border>
+
+        <!-- The theme picker: one card per theme, each framed in its own colours, so the guild's
+             card is gilded and Santa's is red and green. Built in code from the theme packs. -->
+        <Grid x:Name="ThemePicker" Grid.RowSpan="2" IsVisible="False" BackgroundColor="#B8000000" Padding="20">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnThemePickerClose" />
+            </Grid.GestureRecognizers>
+            <Border x:Name="PickerFrame" VerticalOptions="Center" StrokeThickness="4" Padding="16,18"
+                    BackgroundColor="{DynamicResource Header}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="22" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="14">
+                    <Label Text="Choose your workshop" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"
+                           TextColor="{DynamicResource Accent}" SemanticProperties.HeadingLevel="Level1" />
+                    <Label Text="Each one keeps its own game." FontSize="12" HorizontalOptions="Center"
+                           TextColor="{DynamicResource MutedText}" />
+                    <!-- Scrolls once there are more themes than fit: eight cards don't fit a phone. -->
+                    <ScrollView MaximumHeightRequest="460">
+                        <VerticalStackLayout x:Name="ThemeCards" Spacing="12" />
+                    </ScrollView>
+                    <Button Text="Cancel" Clicked="OnThemePickerClose" FontSize="13" HeightRequest="40" CornerRadius="20"
+                            BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
     </Grid>
 </ContentPage>

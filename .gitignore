@@ -3,3 +3,17 @@
 .vs/
 *.user
 *.suo
+
+# Release signing and publishing. Secrets live in .env and off-tree files, never here.
+.env
+*.keystore
+*.jks
+*.mobileprovision
+*.p12
+*.p8
+build/
+scripts/**/.venv/
+scripts/**/__pycache__/
+
+# macOS Finder metadata
+.DS_Store
