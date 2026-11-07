@@ -11,32 +11,45 @@ namespace ProseForge.Game.ViewModels;
 public sealed class GameViewModel : Observable
 {
     private readonly SaveStore store;
+    private readonly EarnedUnlock unlock;
     private readonly VoicePlayer voices;
     private readonly PickerPause picker = new();
     private bool left;
     private string coins = "", goal = "", message = "", delivered = "", pauseText = "", recruitText = "";
-    private string audioStatus = "";
-    private bool started, showOpen, paused, recruitOpen, voicesOn = true;
+    private readonly VoiceLine voiceLine;
+    private bool started, showOpen, paused, recruitOpen;
     private int saveTicks;
+    private long counted;   // this game's deliveries already added to the unlock total
+    private int levels;     // levels reached when last drawn, so a new one is announced once
 
-    public GameViewModel(GameSession session, SaveStore store, VoicePlayer voices, Theme theme)
+    public GameViewModel(GameSession session, SaveStore store, EarnedUnlock unlock, VoicePlayer voices, Theme theme)
     {
         Session = session;
         this.store = store;
+        this.unlock = unlock;
+        counted = session.State.Delivered;   // a resumed game's earlier deliveries are already in the total
+        levels = GameEngine.LevelsReached(session.Gameplay, session.State);   // a resumed game's levels aren't news
         this.voices = voices;
         Theme = theme;
         BackgroundImage = AppThemes.Image(theme.Background);
         Stations = [.. session.Gameplay.Stations.Select((_, i) => new StationViewModel(this, i))];
+        PowerUps = [.. PowerUpButton.All(session.Gameplay, session.State, theme).Select((_, i) => new PowerUpViewModel(this, i))];
         OpenCommand = new Command(Open);
         PauseCommand = new Command(TogglePause);
         RecruitCommand = new Command(() => RecruitOpen = !RecruitOpen);
         message = Theme.Strings.Welcome;
-        audioStatus = Theme.Strings.VoicesReady;
+        voiceLine = new VoiceLine(Theme.Strings);
         Refresh();
     }
 
     public Theme Theme { get; }
     public ObservableCollection<StationViewModel> Stations { get; }
+    // The dock's power-ups, one button each, in the order gameplay.json lists them.
+    public ObservableCollection<PowerUpViewModel> PowerUps { get; }
+    public bool HasPowerUps => PowerUps.Count > 0;
+    // The open hire panel takes the power-up row's place, so the dock is no taller with it open and
+    // never covers the bottom station's worker count.
+    public bool ShowPowerUps => HasPowerUps && !RecruitOpen;
     internal GameSession Session { get; }
     internal Gameplay Rules => Session.Gameplay;
     internal EngineState State => Session.State;
@@ -46,6 +59,15 @@ public sealed class GameViewModel : Observable
     public ICommand RecruitCommand { get; }
 
     public string Title => Theme.Title;
+
+    // The reached level's badge beside the count, when the pack has one.
+    public ImageSource? LevelBadge { get => levelBadge; private set => Set(ref levelBadge, value); }
+    public bool HasLevelBadge => LevelBadge is not null;
+    private ImageSource? levelBadge;
+    private string? levelBadgePath;
+
+    // Raised when a new level is reached, after its message is shown; the page celebrates.
+    public event Action? LevelReached;
     public ImageSource? BackgroundImage { get; }
     public string OpenText => Theme.Strings.OpenButton;
     public string Coins { get => coins; private set => Set(ref coins, value); }
@@ -56,30 +78,47 @@ public sealed class GameViewModel : Observable
     public bool Started { get => started; private set => Set(ref started, value); }
     public bool ShowOpen { get => showOpen; private set => Set(ref showOpen, value); }
     public bool Paused { get => paused; private set => Set(ref paused, value); }
-    public string AudioStatus { get => audioStatus; private set => Set(ref audioStatus, value); }
+    public string AudioStatus => voiceLine.Text;
     public string RecruitText { get => recruitText; private set => Set(ref recruitText, value); }
 
     public bool RecruitOpen
     {
         get => recruitOpen;
-        set { if (Set(ref recruitOpen, value)) Refresh(); }
+        set
+        {
+            if (!Set(ref recruitOpen, value)) return;
+            OnPropertyChanged(nameof(ShowPowerUps));
+            Refresh();
+        }
     }
 
     public bool VoicesOn
     {
-        get => voicesOn;
+        get => voiceLine.On;
         set
         {
-            if (!Set(ref voicesOn, value)) return;
+            if (value == voiceLine.On) return;
+            voiceLine.Switch(value);
             if (!value) voices.Pause();
-            AudioStatus = value ? Theme.Strings.VoicesReady : Theme.Strings.VoicesOff;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(AudioStatus));
         }
     }
+
+    // Raised once, the first time the deliveries across every theme reach EarnedUnlock.Needed.
+    public event Action? Unlocked;
 
     // Called by the page's frame timer: credit the time, save now and then, redraw.
     public void Frame()
     {
         Session.CatchUp();
+        // Checked here rather than in Refresh, so it only fires once a page is listening.
+        CountDeliveries();
+        if (unlock.Due && Unlocked is not null)
+        {
+            unlock.MarkShown();
+            Unlocked();
+        }
         if (!State.CanAct) return;
         if (++saveTicks >= 10)
         {
@@ -148,6 +187,17 @@ public sealed class GameViewModel : Observable
     private void Open() => Perform((_, s) => GameEngine.Open(s), Theme.Strings.OpenMessage,
         Theme.Strings.OpenVoice, Theme.Stations[0].Worker);
 
+    private void AnnounceLevel()
+    {
+        var reached = GameEngine.LevelsReached(Rules, State);
+        if (reached <= levels) { levels = reached; return; }
+        levels = reached;
+        if (Boosts.CurrentLevel(Rules, State, Theme) is not { } look) return;
+        Message = look.Message;
+        if (look.Voice is not null) _ = SpeakAsync(look.Voice, look.Label);
+        LevelReached?.Invoke();
+    }
+
     private void TogglePause()
     {
         // The message describes where the guild ends up, not where it was.
@@ -158,24 +208,48 @@ public sealed class GameViewModel : Observable
 
     private async Task SpeakAsync(string asset, string speaker)
     {
-        if (!VoicesOn) return;
-        AudioStatus = await voices.PlayAsync(asset)
-            ? ThemeText.Fill(Theme.Strings.VoicePlaying, ("name", speaker))
-            : Theme.Strings.VoiceUnavailable;
+        if (voiceLine.Begin() is not { } clip) return;
+        var loaded = await voices.LoadAsync(asset, () => voiceLine.IsCurrent(clip), () =>
+        {
+            voiceLine.Ended(clip);
+            OnPropertyChanged(nameof(AudioStatus));
+        });
+        if (voiceLine.Started(clip, speaker, loaded)) voices.Play();
+        OnPropertyChanged(nameof(AudioStatus));
+    }
+
+    private void CountDeliveries()
+    {
+        var delivered = State.Delivered;
+        if (delivered > counted) unlock.Add(delivered - counted);
+        counted = delivered;
     }
 
     public void Refresh()
     {
+        CountDeliveries();
         var s = State;
         var text = Theme.Strings;
         Coins = ThemeText.Fill(text.Coins, ("n", Count.Short(s.Coins)));
-        Delivered = ThemeText.Fill(text.Delivered, ("n", s.Delivered));
+        // The highest level reached sits beside the count in the dock. Beside the title it was
+        // cut off: the header row has no room once the coins and buttons are in it (dev phone, 2026-11-05).
+        var deliveredText = ThemeText.Fill(text.Delivered, ("n", s.Delivered));
+        var level = Boosts.CurrentLevel(Rules, s, Theme);
+        Delivered = level is not null ? $"{deliveredText} · {level.Label}" : deliveredText;
+        if (level?.Badge != levelBadgePath)
+        {
+            levelBadgePath = level?.Badge;
+            LevelBadge = AppThemes.Image(levelBadgePath);
+            OnPropertyChanged(nameof(HasLevelBadge));
+        }
         Started = s.Started;
         ShowOpen = !s.Started;
         Paused = s.Paused;
         PauseText = s.Paused ? text.Resume : text.Pause;
         RecruitText = RecruitOpen ? text.RecruitClose : text.Recruit;
         Goal = GoalText.Next(Rules, State, Theme.Strings);
+        AnnounceLevel();
+        foreach (var powerUp in PowerUps) powerUp.Refresh();
         foreach (var station in Stations) station.Refresh();
     }
 }

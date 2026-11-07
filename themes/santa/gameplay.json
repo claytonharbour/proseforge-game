@@ -5,6 +5,52 @@
   "tools": [
     { "id": "tape", "starting": 1, "upgradeCost": 15 }
   ],
+  "powerUps": [
+    {
+      "id": "reindeer-express",
+      "cost": 50,
+      "seconds": 45,
+      "unlockAt": 0,
+      "every": 45,
+      "stays": 15,
+      "effect": { "kind": "Speed", "station": "*", "factor": 1.5 }
+    },
+    {
+      "id": "busy-bench",
+      "cost": 55,
+      "seconds": 30,
+      "unlockAt": 25,
+      "every": 60,
+      "stays": 15,
+      "effect": { "kind": "Batch", "station": "make", "add": 1 }
+    },
+    {
+      "id": "christmas-eve",
+      "cost": 65,
+      "seconds": 30,
+      "unlockAt": 100,
+      "every": 90,
+      "stays": 15,
+      "effect": { "kind": "Price", "station": "deliver", "factor": 2 }
+    }
+  ],
+  "levels": [
+    {
+      "id": "head-elf",
+      "delivered": 25,
+      "reward": { "kind": "Price", "station": "deliver", "add": 1 }
+    },
+    {
+      "id": "workshop-captain",
+      "delivered": 100,
+      "reward": { "kind": "Speed", "station": "wrap", "factor": 1.25 }
+    },
+    {
+      "id": "north-pole-legend",
+      "delivered": 250,
+      "reward": { "kind": "Speed", "station": "*", "factor": 1.2 }
+    }
+  ],
   "stations": [
     { "id": "make", "secondsPerJob": 3, "hireCost": 20, "startingWorkers": 1, "handoff": "Automatic" },
     { "id": "wrap", "secondsPerJob": 4, "hireCost": 25, "startingWorkers": 2, "handoff": "Automatic",

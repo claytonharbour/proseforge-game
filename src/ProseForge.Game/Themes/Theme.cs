@@ -13,7 +13,13 @@ public sealed record Theme(
     string Background,
     IReadOnlyList<StationLook> Stations,
     ThemeStrings Strings,
-    string License = "");
+    string License = "",
+    IReadOnlyList<PowerUpLook>? PowerUps = null,
+    IReadOnlyList<LevelLook>? Levels = null)
+{
+    public PowerUpLook? PowerUpLookFor(string id) => PowerUps?.FirstOrDefault(p => p.Id == id);
+    public LevelLook? LevelLookFor(string id) => Levels?.FirstOrDefault(l => l.Id == id);
+}
 
 // theme.json as written in a pack: the same as Theme, but the gameplay is a file name and every
 // picture and sound is a path inside the pack folder.
@@ -25,7 +31,24 @@ public sealed record ThemeFile(
     string Background,
     Palette Palette,
     IReadOnlyList<StationLook> Stations,
-    ThemeStrings Strings);
+    ThemeStrings Strings,
+    IReadOnlyList<PowerUpLook>? PowerUps = null,   // one per power-up in gameplay.json, by id
+    IReadOnlyList<LevelLook>? Levels = null);      // one per level in gameplay.json, by id
+
+// How a power-up looks and reads. The rules (cost, seconds, effect) are in gameplay.json.
+public sealed record PowerUpLook(
+    string Id,                   // the power-up's id in gameplay.json
+    string Label,                // "Hot Oven"
+    string Message,              // said when it starts: "The oven roars. Two extra loaves a batch."
+    string? Icon = null);        // a square PNG; a drawn stand-in shows until there is one
+
+// How a level looks and sounds. What it rewards is in gameplay.json.
+public sealed record LevelLook(
+    string Id,
+    string Label,                // "Head Baker"; shown beside the delivered count once reached
+    string Message,              // said when it's reached: "Head Baker! The counter sells for a coin more."
+    string? Badge = null,        // a square PNG; a drawn stand-in shows until there is one
+    string? Voice = null);       // played when it's reached
 
 public sealed record StationLook(
     string Worker,               // "monk"
@@ -45,7 +68,10 @@ public sealed record StationLook(
     bool SellsAll = false,       // one button sells everything finished here
     string? SellMessage = null,  // "A reader takes a story home. +{price} coins."
     string? ToolLabel = null,    // on a station that needs a shared tool: "+1 tape · {cost}"; {n} is how many there are
-    string? ToolMessage = null); // "Another roll of tape. Two gifts can be wrapped at once."
+    string? ToolMessage = null,  // "Another roll of tape. Two gifts can be wrapped at once."
+    string? VoiceId = null,      // the TTS voice that recorded Voice: "bf_alice"
+    string? Speaker = null,      // who the Actor picture shows: "woman" or "man"
+    string? VoiceGender = null); // only for a voice whose id doesn't say it (not Kokoro): "woman" or "man"
 
 // Colour roles, not colours: every XAML colour is a DynamicResource named after one of these.
 public sealed record Palette(
@@ -91,4 +117,11 @@ public sealed record ThemeStrings(
     IReadOnlyList<string> GoalHire, // per station after the first: what to save for next
     string GoalSendToLast,
     string GoalSellLast,
-    string GoalChainDone);
+    string GoalChainDone,
+    // Power-up words, with defaults so packs written before power-ups still load. The button shows the
+    // name over the price or the time left (three share the dock, so one line is too narrow);
+    // the whole sentence is what a screen reader says.
+    string PowerUpButton = "{label} · {cost}",   // said while it can be bought
+    string PowerUpRunning = "{label} · {left}s",   // said while it runs; {left} is whole seconds
+    string PowerUpCost = "{cost}",   // the button's second line while it can be bought
+    string PowerUpLeft = "{left}s");  // the button's second line while it runs

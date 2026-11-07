@@ -82,7 +82,7 @@ Fill in the `<…>` parts. They're adapted from prompts that worked on 2026-10-3
 
 Image tools sometimes draw the grey-and-white "transparency" pattern into the picture instead of
 leaving real transparency (`magick identify` shows `srgb`, not `srgba`). Before paying for a new image,
-try removing it locally. On Wool & Needle, 2026-10-30, this saved three image calls:
+try removing it locally. On one pack this saved three image calls:
 
 1. In a **working copy**, turn near-white, colourless pixels white
    (`-fx "(saturation<0.07 && lightness>0.76) ? 1 : u"`), so the soft edges around each square stop
@@ -97,21 +97,12 @@ try removing it locally. On Wool & Needle, 2026-10-30, this saved three image ca
 5. Check over a dark colour, over red, and over the real background on the phone. Grey hair and pale
    clothes are where it goes wrong.
 
-## What worked (2026-10-30, six packs in about 25 minutes)
+## What worked
 
-What Crispin checked was what Rowan and Angel **posted**: every posted background fitted the art
-guide, and every posted cut-out was a clean transparent 1254×1254 picture. That isn't the same as
-"first try". The artists inspected and redid work before posting (Angel redid the honey extractor,
-whose machine dwarfed the worker at phone size, and one bakery attempt was blocked by the image tool).
-Count the attempts as well as the results.
+Every background made against the art guide fitted it, and every cut-out made from the brief above
+came back as a clean transparent 1254×1254 picture. That isn't the same as "first try": inspect and
+redo work before you call it done, and count the attempts as well as the results. One extractor
+character was redone because its machine dwarfed the worker at phone size.
 
-| Pack | Art by | Notes |
-|---|---|---|
-| post-office | Rowan | the shared sealing bench sits on the middle floor |
-| bakery | Angel's characters on Rowan's background | the background was reused, not regenerated, after the split changed |
-| pottery | Rowan | the kiln on the middle floor; same face three times |
-| bee-farm | Angel | three distinct people; background resampled to 1080 wide |
-| rocket-yard | Rowan | the rocket stands behind the engineer on the assembly floor |
-| fast-food | Angel | the grill is visible behind the grill cook; resampled |
+Keep each prompt with the file it made, word for word, so the next picture in the set can match it.
 
-The full prompts are in each pack's `PROMPTS.md`, copied verbatim from the artists' posts.

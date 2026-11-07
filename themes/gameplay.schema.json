@@ -139,6 +139,147 @@
           "minimum": 1
         }
       }
+    },
+    "powerUps": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "description": "Boosts bought with coins for a while, up to three: each gets its own dock button and clock, so they can run together. Buying one again while it runs restarts its clock.",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "cost",
+          "seconds",
+          "effect"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cost": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "seconds": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 600
+          },
+          "effect": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "station"
+            ],
+            "description": "What a boost changes at a station. Speed divides the seconds a job takes (factor above 1); Batch adds items per job (add); Price multiplies (factor) and adds to (add) what one item sells for.",
+            "properties": {
+              "kind": {
+                "enum": [
+                  "Speed",
+                  "Batch",
+                  "Price"
+                ]
+              },
+              "station": {
+                "type": "string",
+                "minLength": 1,
+                "description": "A station id, or \"*\" for every station."
+              },
+              "factor": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 10
+              },
+              "add": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              }
+            }
+          },
+          "unlockAt": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Items delivered before this power-up unlocks. Default 0: there from the start."
+          },
+          "every": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3600,
+            "description": "Seconds between visits once unlocked. Default 0: always there."
+          },
+          "stays": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Seconds each visit lasts; no more than every."
+          }
+        }
+      }
+    },
+    "levels": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "description": "Boosts earned for good once enough has been delivered, listed in the order they're reached.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "delivered",
+          "reward"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "delivered": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "reward": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "station"
+            ],
+            "description": "What a boost changes at a station. Speed divides the seconds a job takes (factor above 1); Batch adds items per job (add); Price multiplies (factor) and adds to (add) what one item sells for.",
+            "properties": {
+              "kind": {
+                "enum": [
+                  "Speed",
+                  "Batch",
+                  "Price"
+                ]
+              },
+              "station": {
+                "type": "string",
+                "minLength": 1,
+                "description": "A station id, or \"*\" for every station."
+              },
+              "factor": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 10
+              },
+              "add": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -49,9 +49,14 @@ public sealed class StationViewModel : Observable
 
     private StationRow Compute() => StationRow.For(parent.Rules, parent.State, parent.Theme, Index, ActorImage is not null);
 
+    private bool boosted;
+    // True while a level or a running power-up is boosting this station: the row glows.
+    public bool Boosted { get => boosted; private set => Set(ref boosted, value); }
+
     // Recompute, and tell the screen about exactly the values that changed.
     internal void Refresh()
     {
+        Boosted = Boosts.Boosted(parent.Rules, parent.State, Index);
         var before = row;
         row = Compute();
         if (row == before) return;

@@ -2,7 +2,7 @@
   "$schema": "../theme.schema.json",
   "id": "rocket-yard",
   "title": "ROCKET YARD",
-  "license": "Copyright Clayton Harbour. Candidate pack: draft words; art to be CC BY 4.0 if chosen for the public release.",
+  "license": "Copyright Clayton Harbour. Art, voices, words and rules licensed CC BY 4.0; see LICENSE.",
   "gameplay": "gameplay.json",
   "background": "art/background.png",
   "palette": {
@@ -28,7 +28,8 @@
       "stockLabel": "Parts made",
       "hireLabel": "Machinist",
       "hireMessage": "Another machinist clocks in.",
-      "actor": "art/machinist.png"
+      "actor": "art/machinist.png",
+      "voice": "audio/machinist-welcome.wav", "voiceId": "af_river", "speaker": "woman"
     },
     {
       "worker": "engineer",
@@ -38,7 +39,8 @@
       "stockLabel": "Modules waiting: {waiting}",
       "hireLabel": "Engineer",
       "hireMessage": "Another engineer grabs a wrench.",
-      "actor": "art/engineer.png"
+      "actor": "art/engineer.png",
+      "voice": "audio/engineer-welcome.wav", "voiceId": "am_fenrir", "speaker": "man"
     },
     {
       "worker": "flight",
@@ -48,11 +50,52 @@
       "stockLabel": "On the pad: {waiting} / 10",
       "hireLabel": "Flight crew",
       "hireMessage": "Another flight crew suits up.",
-      "actor": "art/flight.png"
+      "actor": "art/flight.png",
+      "voice": "audio/flight-welcome.wav", "voiceId": "af_kore", "speaker": "woman"
+    }
+  ],
+  "powerUps": [
+    {
+      "id": "countdown",
+      "label": "Countdown",
+      "icon": "art/powerup.png",
+      "message": "Countdown! Launches go twice as fast for 30 seconds."
+    },
+    {
+      "id": "spare-parts",
+      "label": "Spare Parts",
+      "icon": "art/powerups/spare-parts.png",
+      "message": "A crate of spares arrives. Each machinist makes two parts at once for 30 seconds."
+    },
+    {
+      "id": "sponsor-deal",
+      "label": "Sponsor Deal",
+      "icon": "art/powerups/sponsor-deal.png",
+      "message": "A sponsor signs on. Every launch pays twice for 30 seconds."
+    }
+  ],
+  "levels": [
+    {
+      "id": "flight-director",
+      "label": "Flight Director",
+      "badge": "art/levels/level-1.png",
+      "message": "Flight Director! Each launch earns a coin more."
+    },
+    {
+      "id": "mission-control",
+      "label": "Mission Control",
+      "badge": "art/levels/level-2.png",
+      "message": "Mission Control! Assembly works a quarter faster."
+    },
+    {
+      "id": "star-admiral",
+      "label": "Star Admiral",
+      "badge": "art/levels/level-3.png",
+      "message": "Star Admiral! The whole yard works a little faster."
     }
   ],
   "strings": {
-    "openVoice": null,
+    "openVoice": "audio/machinist-welcome.wav",
     "coins": "{n} coins",
     "pause": "Pause",
     "resume": "Resume",

@@ -28,8 +28,15 @@ for rel, f in sorted(lines.items(), key=lambda kv: sum(1 for h in kv[1].values()
     hit = sum(1 for h in f.values() if h)
     print(f"  {hit / len(f):6.1%}  {hit:4}/{len(f):<4} {rel}")
 
+def from_src(path):
+    """A path as 'src/…', whatever folder the source was given as (a worktree, an absolute path),
+    so it compares with the report's names."""
+    path = path.replace("\\", "/")
+    return "src/" + path.split("/src/", 1)[1] if "/src/" in path else path
+
+
 outside = [p for p in glob.glob(f"{src}/**/*.cs", recursive=True)
-           if "/obj/" not in p and "/bin/" not in p and p not in lines]
+           if "/obj/" not in p and "/bin/" not in p and from_src(p) not in lines]
 print(f"\nNot compiled into the tests ({len(outside)} files, screens and platform start-up):")
 for p in sorted(outside):
     print(f"  {p}")

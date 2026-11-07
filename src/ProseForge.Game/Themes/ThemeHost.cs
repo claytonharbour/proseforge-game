@@ -18,21 +18,28 @@ public sealed class ThemeHost
     private const bool IncludeDrafts = false;
 #endif
     private readonly SaveStore saves;
+    private readonly EarnedUnlock unlock;
     private readonly ThemeResources resources;
     private readonly VoicePlayer voices;
     private readonly TimeProvider clock;
     private readonly ThemeIndex index;
     private IReadOnlyList<ThemeChoice>? choices;
 
-    public ThemeHost(SaveStore saves, ThemeResources resources, VoicePlayer voices, TimeProvider clock)
+    public ThemeHost(SaveStore saves, EarnedUnlock unlock, ThemeResources resources, VoicePlayer voices, TimeProvider clock)
     {
         this.saves = saves;
+        this.unlock = unlock;
         this.resources = resources;
         this.voices = voices;
         this.clock = clock;
         var problems = new List<ThemeProblem>();
         index = ThemeSwitch.LoadIndex(AppThemes.Open, problems) ?? throw new InvalidOperationException(
             $"The bundled theme list didn't load: {string.Join("; ", problems)}");
+
+        // Deliveries made before the unlock existed count toward it. Read once, on the first
+        // start of a build that has it; the packs are only loaded if that's now.
+        unlock.StartFrom(index.Offered(IncludeDrafts).Select(id => AppThemes.Load(id).Theme)
+            .OfType<Theme>().Select(t => saves.Load(t.Gameplay)?.Delivered ?? 0));
 
         // Start in the last theme played. If it no longer loads, the default must: a build whose own
         // default pack is broken shouldn't run.
@@ -57,24 +64,21 @@ public sealed class ThemeHost
             .OfType<Theme>()
             .Select(t => new ThemeChoice(t.Id, t.Title, t.Palette, t.Background))];
 
-    // Switch to another theme. Returns null on success, or why the switch was refused.
+    // Switch to another theme. Returns null on success, or why the switch was refused. The order
+    // lives in ThemeSwitch.Run, where the tests can check it; this supplies the phone's steps.
     public string? Switch(string id)
     {
-        if (id == Current.Theme.Id) return null;
-        var plan = Prepare(id);
-        if (!plan.Ready)
-            return string.Join(" ", plan.Problems.Where(p => p.Level == ProblemLevel.Error).Select(p => p.Message));
-
-        Current.Leave();   // saves the game being left, running or paused as the player had it
-        Current = Build(plan);
-        ApplyPalette();
-        Preferences.Default.Set(ChoiceKey, id);
-        Switched?.Invoke(Current);
-        return null;
+        var before = Current;
+        (Current, var refusal) = ThemeSwitch.Run(Current, Current.Theme.Id, id, Prepare, Build,
+            leave: game => game.Leave(),   // saves the game being left, running or paused as the player had it
+            paint: game => resources.Apply(game.Theme.Palette),
+            remember: chosen => Preferences.Default.Set(ChoiceKey, chosen));
+        if (!ReferenceEquals(Current, before)) Switched?.Invoke(Current);
+        return refusal;
     }
 
     private ThemeSwitchPlan Prepare(string id) => ThemeSwitch.Prepare(index, IncludeDrafts, id, AppThemes.Open, saves.Load);
 
     private GameViewModel Build(ThemeSwitchPlan plan) =>
-        new(new GameSession(plan.Theme!.Gameplay, plan.State, clock), saves, voices, plan.Theme);
+        new(new GameSession(plan.Theme!.Gameplay, plan.State, clock), saves, unlock, voices, plan.Theme);
 }

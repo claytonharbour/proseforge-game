@@ -30,6 +30,11 @@
                     </VerticalStackLayout>
                 </Grid>
 
+                <!-- How this was made: the art gallery, shown once 100 deliveries have earned it. -->
+                <Button x:Name="HowMadeButton" Text="How this was made: the art gallery" IsVisible="False"
+                        Clicked="OnHowMadeClicked" FontSize="12" CornerRadius="16" HeightRequest="36"
+                        BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Accent}" />
+
                 <!-- The book about making this game: always shown in full, with its cover. -->
                 <Border BackgroundColor="{DynamicResource Panel}" Stroke="{DynamicResource Accent}" StrokeThickness="2"
                         StrokeShape="RoundRectangle 12" Padding="12">
@@ -95,5 +100,11 @@
                 </Border>
             </DataTemplate>
         </CollectionView.ItemTemplate>
+        <!-- The open-source licences, after the books so they stay the page's focus. -->
+        <CollectionView.Footer>
+            <Button Text="Open-source licences" Clicked="OnLicencesClicked" FontSize="11" Padding="8,0"
+                    HorizontalOptions="Center" Margin="0,8,0,24" BackgroundColor="Transparent"
+                    TextColor="{DynamicResource MutedText}" />
+        </CollectionView.Footer>
     </CollectionView>
 </ContentPage>

@@ -1,0 +1,4 @@
+Use case: stylized-concept. Asset type: a compact mobile-game icon for the Village Bakery theme of One More Story. The attached bakery background is STYLE and palette reference only, not an edit target. Match its cosy sunlit storybook 3D illustration, warm stone, honeyed wood and golden baked-goods palette. Centered single bold silhouette, simple and legible at 48-point size, square canvas, generous transparent margins, genuine transparent background and clean alpha. No scene/background/floor, no text or numerals, no logos or watermark. Level 2 Early Riser: one circular SILVER medal, same simple round loaf and wheat emblem, with a small rising sun behind the loaf and a restrained double rim. Read as silver and a clear step up from level 1; no extra objects.
+
+Style reference: themes/bakery/art/background.png
+Generator: built-in image_gen, transparent_background=true. Resized to 512x512 without flattening alpha.

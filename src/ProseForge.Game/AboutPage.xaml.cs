@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using ProseForge.Game.Presentation;
+using ProseForge.Game.Themes;
 using ProseForge.Game.ViewModels;
 
 namespace ProseForge.Game;
@@ -57,18 +59,34 @@ public partial class AboutPage : ContentPage
         }
     }
 
-    public AboutPage(BookCatalogService catalogService)
+    public AboutPage(BookCatalogService catalogService, EarnedUnlock unlock, bool highlight = false)
     {
         InitializeComponent();
         this.catalogService = catalogService;
         compact = Preferences.Default.Get(CompactKey, false);   // covers shown unless the player chose compact
         BindingContext = this;
+        // The art gallery: earned in the store game by 100 deliveries across every theme, or
+        // switched on from the start by a build's features.json. A build without gallery/ (the public
+        // copy) has nothing to show, so the button stays hidden.
+        gallery = FeatureFlags.Load(AppThemes.Open).Gallery || unlock.Unlocked ? Gallery.Load(AppThemes.Open, []) : null;
+        HowMadeButton.IsVisible = gallery is not null;
+        this.highlight = highlight && gallery is not null;
+    }
+
+    private bool highlight;
+
+    private readonly Gallery? gallery;
+
+    private async void OnHowMadeClicked(object? sender, EventArgs e)
+    {
+        if (gallery is not null) await Navigation.PushAsync(new GalleryPage(gallery));
     }
 
     // Show what we already have at once; refresh in the background only if it's missing or stale.
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        if (highlight) ShowUnlocked();
         catalogService.Updated += OnCatalogUpdated;
         var cached = await catalogService.GetCachedAsync();
         if (cached is not null) Show(cached);
@@ -83,6 +101,21 @@ public partial class AboutPage : ContentPage
     {
         catalogService.Updated -= OnCatalogUpdated;
         base.OnDisappearing();
+    }
+
+    // Arriving from the unlock: the button the player just earned is the brightest thing here.
+    private async void ShowUnlocked()
+    {
+        highlight = false;
+        HowMadeButton.SetDynamicResource(BackgroundColorProperty, "Accent");
+        HowMadeButton.SetDynamicResource(Button.TextColorProperty, "OnAccent");
+        HowMadeButton.Text = "Unlocked: how this game was made";
+        if (Motion.Reduced) return;
+        for (var i = 0; i < 3; i++)
+        {
+            await HowMadeButton.ScaleToAsync(1.08, 220, Easing.SinInOut);
+            await HowMadeButton.ScaleToAsync(1, 220, Easing.SinInOut);
+        }
     }
 
     private void OnCatalogUpdated() => MainThread.BeginInvokeOnMainThread(async () =>
@@ -112,6 +145,8 @@ public partial class AboutPage : ContentPage
         catalogService.CoverFile(book.CoverUrl) is { } file ? ImageSource.FromFile(file)
         : book.CoverUrl is { } url ? new UriImageSource { Uri = new Uri(url), CacheValidity = TimeSpan.FromDays(7) }
         : null;
+
+    private async void OnLicencesClicked(object? sender, EventArgs e) => await Navigation.PushAsync(new LicencesPage());
 
     private async void OnAuthorTapped(object? sender, TappedEventArgs e) =>
         await Launcher.Default.OpenAsync(AuthorBooksUrl);

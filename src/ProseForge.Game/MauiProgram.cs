@@ -23,6 +23,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton(TimeProvider.System);
 		builder.Services.AddSingleton<ISaveSlots, PreferenceSlots>();
 		builder.Services.AddSingleton<SaveStore>();
+		builder.Services.AddSingleton<EarnedUnlock>();
 		builder.Services.AddScoped<GuildHallScene>();
 		builder.Services.AddSingleton<ThemeResources>();
 		builder.Services.AddSingleton<VoicePlayer>();

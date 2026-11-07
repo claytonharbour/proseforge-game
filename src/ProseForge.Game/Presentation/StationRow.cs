@@ -26,7 +26,7 @@ public sealed record StationRow(
 
     public static StationRow For(Gameplay game, EngineState state, Theme theme, int index, bool hasActor)
     {
-        var rules = game.Stations[index];
+        var rules = GameEngine.Effective(game, state, index);   // as boosts make it now: the price and pace shown
         var look = theme.Stations[index];
         var text = theme.Strings;
         var me = state.Stations[index];
@@ -51,7 +51,7 @@ public sealed record StationRow(
 
         var cost = GameEngine.HireCost(game, state, index);
         return new StationRow(
-            status, stock, me.Progress / rules.SecondsPerJob, hasActor && me.Workers > 0,
+            status, stock, me.Progress / game.Stations[index].SecondsPerJob /* progress is kept in the station's own job time */, hasActor && me.Workers > 0,
             action, label, enabled,
             SellVisible: game.Payout == PayoutRule.AnyStage && rules.SellPrice is not null,
             SellText: look.SellsAll ? text.SellAll : ThemeText.Fill(text.SellOne, ("price", rules.SellPrice ?? 0)),

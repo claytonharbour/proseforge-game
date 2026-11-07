@@ -2,7 +2,7 @@
   "$schema": "../theme.schema.json",
   "id": "santa",
   "title": "SANTA'S WORKSHOP",
-  "license": "Copyright Clayton Harbour. All rights reserved. Draft: placeholder words, no art; not canon.",
+  "license": "Copyright Clayton Harbour. All rights reserved. Characters from Santa's Practice Run. The public code includes this pack's rules and words so the game runs and as an example of the format; they aren't licensed for reuse. Its art and voices ship only in the app, not in the public code.",
   "gameplay": "gameplay.json",
   "background": "art/workshop.png",
   "palette": {
@@ -26,9 +26,10 @@
       "activity": "making toys",
       "empty": "Toymaker · empty bench",
       "actor": "art/toymaker.png",
+      "voice": "audio/toymaker-welcome.wav", "voiceId": "af_heart", "speaker": "woman",
       "stockLabel": "Toys made",
       "hireLabel": "Toymaker",
-      "hireMessage": "[draft] Another toymaker picks up a hammer."
+      "hireMessage": "Another toymaker picks up a hammer."
     },
     {
       "worker": "wrapper",
@@ -36,11 +37,12 @@
       "activity": "wrapping",
       "empty": "Wrapper · empty table",
       "actor": "art/wrapper.png",
+      "voice": "audio/wrapper-welcome.wav", "voiceId": "bf_emma", "speaker": "woman",
       "stockLabel": "Boxes waiting: {waiting} · rolls of tape: {tools}",
       "hireLabel": "Wrapper",
-      "hireMessage": "[draft] Another wrapper sits down. There's still only so much tape.",
+      "hireMessage": "Another wrapper sits down. There's still only so much tape.",
       "toolLabel": "+1 tape · ♥ {cost}",
-      "toolMessage": "[draft] Another roll of tape. One more box can be wrapped at a time."
+      "toolMessage": "Another roll of tape. One more box can be wrapped at a time."
     },
     {
       "worker": "driver",
@@ -48,22 +50,63 @@
       "activity": "delivering",
       "empty": "Sleigh · no driver",
       "actor": "art/driver.png",
+      "voice": "audio/driver-welcome.wav", "voiceId": "am_santa", "speaker": "man",
       "stockLabel": "On the sleigh: {waiting}",
       "hireLabel": "Sleigh",
-      "hireMessage": "[draft] Another sleigh is hitched up."
+      "hireMessage": "Another sleigh is hitched up."
+    }
+  ],
+  "powerUps": [
+    {
+      "id": "reindeer-express",
+      "label": "Reindeer Dash",
+      "icon": "art/powerup.png",
+      "message": "The reindeer are harnessed early. The whole workshop works half again as fast for 45 seconds."
+    },
+    {
+      "id": "busy-bench",
+      "label": "Busy Bench",
+      "icon": "art/powerups/busy-bench.png",
+      "message": "Every bench is busy. Each toymaker makes two toys at once for 30 seconds."
+    },
+    {
+      "id": "christmas-eve",
+      "label": "Christmas Eve",
+      "icon": "art/powerups/christmas-eve.png",
+      "message": "It's Christmas Eve. Every delivery brings twice the hearts for 30 seconds."
+    }
+  ],
+  "levels": [
+    {
+      "id": "head-elf",
+      "label": "Head Elf",
+      "badge": "art/levels/level-1.png",
+      "message": "Head Elf! Every delivered present brings one more heart."
+    },
+    {
+      "id": "workshop-captain",
+      "label": "Workshop Captain",
+      "badge": "art/levels/level-2.png",
+      "message": "Workshop Captain! The wrappers work a quarter faster."
+    },
+    {
+      "id": "north-pole-legend",
+      "label": "North Pole Legend",
+      "badge": "art/levels/level-3.png",
+      "message": "North Pole Legend! Everyone in the workshop works a little faster."
     }
   ],
   "strings": {
     "openButton": "Open the workshop",
-    "openMessage": "[draft] The workshop lights come on.",
-    "openVoice": null,
-    "welcome": "[draft] Placeholder Santa pack for testing the theme switch.",
+    "openMessage": "The workshop lights come on.",
+    "openVoice": "audio/toymaker-welcome.wav",
+    "welcome": "Toys to make, gifts to wrap, and a sleigh to fill before morning.",
     "coins": "♥ {n}",
     "delivered": "{n} gifts delivered",
     "pause": "Pause",
     "resume": "Resume",
-    "pausedMessage": "[draft] The workshop is quiet.",
-    "resumedMessage": "[draft] The workshop hums again.",
+    "pausedMessage": "The workshop is quiet.",
+    "resumedMessage": "The workshop hums again.",
     "workerStatus": "{n} {who} · {activity}",
     "sellOne": "Deliver",
     "sellAll": "Deliver all",
@@ -74,17 +117,17 @@
     "voicesOff": "Voices off",
     "voicePlaying": "Playing {name}",
     "voiceUnavailable": "No voice yet in this draft pack.",
-    "workerSpeaks": "[draft] A helper speaks.",
+    "workerSpeaks": "A helper speaks.",
     "voicesOffHint": "Turn voices on in Hire helpers to hear them.",
-    "goalStart": "[draft] Open the workshop.",
-    "goalPaused": "[draft] The workshop is paused. Resume when you are ready.",
-    "goalFirstSale": "[draft] Fill a sleigh: three delivered gifts earn the first hearts.",
+    "goalStart": "Open the workshop.",
+    "goalPaused": "The workshop is paused. Resume when you are ready.",
+    "goalFirstSale": "Fill a sleigh: three delivered gifts earn the first hearts.",
     "goalHire": [
-      "[draft] Boxes piling up? More wrappers won't help with one roll of tape. Buy tape ({cost} for a wrapper).",
-      "[draft] Save ♥ {cost} for another sleigh."
+      "Boxes piling up? More wrappers won't help with one roll of tape. Buy tape ({cost} for a wrapper).",
+      "Save ♥ {cost} for another sleigh."
     ],
-    "goalSendToLast": "[draft] Keep the tape flowing to the sleigh.",
-    "goalSellLast": "[draft] Watch the pile at the wrapping table.",
-    "goalChainDone": "[draft] The line is running. Find the next bottleneck."
+    "goalSendToLast": "Keep the tape flowing to the sleigh.",
+    "goalSellLast": "Watch the pile at the wrapping table.",
+    "goalChainDone": "The line is running. Find the next bottleneck."
   }
 }

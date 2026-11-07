@@ -31,20 +31,32 @@
 		<ApplicationTitle>One More Story</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>ai.proseforge.game</ApplicationId>
+		<ApplicationId>ai.proseforge.game.onemorestory</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
+		<ApplicationDisplayVersion>1.4</ApplicationDisplayVersion>
+		<ApplicationVersion>5</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>None</WindowsPackageType>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+
+	<!-- Allow an Xcode newer than the .NET iOS SDK expects. The SDK 26.2 workload pins Xcode
+	     26.2, older than a current Xcode (dotnet/maui#34295).
+	     Remove once the iOS workload catches up with the installed Xcode. -->
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' Or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
+		<ValidateXcodeVersion>false</ValidateXcodeVersion>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<!-- Where the packed themes/ and gallery/ come from: the repo by default. -->
+		<AssetRoot Condition="'$(AssetRoot)' == ''">..\..\</AssetRoot>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -56,17 +68,24 @@
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
-		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
 
 		<!-- Custom Fonts -->
-		<MauiFont Include="Resources\Fonts\*" />
+		<MauiFont Include="Resources\Fonts\*.ttf" />
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+		<!-- the open-source licences page reads the generated notices file from the repo root. -->
+		<MauiAsset Include="..\..\THIRD_PARTY_NOTICES.md" LogicalName="THIRD_PARTY_NOTICES.md" />
 
 		<!-- Theme packs: every pack under the repository's themes/ folder ships as
 		     themes/<id>/... inside the app, read at runtime by ThemePacks. -->
-		<MauiAsset Include="..\..\themes\**" Exclude="..\..\themes\*.schema.json;..\..\themes\README.md;..\..\themes\**\PROMPTS.md"
+		<!-- The "How this was made" art gallery, shown once 100 deliveries have earned it.
+		     It replaces the room transcript, which no longer ships. -->
+		<MauiAsset Include="$(AssetRoot)gallery\**" LogicalName="gallery\%(RecursiveDir)%(Filename)%(Extension)" />
+
+		<!-- AssetRoot is the repo (the PNG masters) unless a release build points it at the WebP copy
+		     that `make optimize` stages in build/packaged. The app reads either format. -->
+		<MauiAsset Include="$(AssetRoot)themes\**" Exclude="$(AssetRoot)themes\*.schema.json;$(AssetRoot)themes\README.md;$(AssetRoot)themes\**\PROMPTS.md"
 		           LogicalName="themes\%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 

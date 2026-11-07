@@ -1,0 +1,3 @@
+Use case: stylized-concept. Original transparent mobile-game power-up icon for One More Story Rocket Yard theme, Spare Parts. Attached Rocket Yard background is STYLE and PALETTE reference only, not a subject. One open teal metal supply crate with a single oversized brass gear rising from it and one red-handled bolt visible, forming ONE bold compact silhouette. Match sunset workshop, warm copper highlights, teal/brick-red palette, hand-painted dimensional storybook 3D. Legible at 48 points; centered square with transparent margins and clean alpha. No workshop or sky, floor, scenery, lettering, numerals, border, badge, watermark, extra objects.
+
+Reference: themes/rocket-yard/art/background.png. Generated at 1254×1254, mechanically resized to 512×512.

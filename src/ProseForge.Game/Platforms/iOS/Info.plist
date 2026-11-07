@@ -28,5 +28,9 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<!-- No encryption beyond the system's own (HTTPS for the About bookshelf), so App Store Connect
+	     doesn't hold each build for an export-compliance answer. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

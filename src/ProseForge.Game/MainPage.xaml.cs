@@ -14,21 +14,27 @@ public partial class MainPage : ContentPage
     private readonly ThemeHost themes;
     private readonly BookCatalogService catalogService;
     private readonly IGameSceneManager sceneManager;
+    private readonly EarnedUnlock unlock;
     private readonly IDispatcherTimer timer;
 
-    public MainPage(GameViewModel model, ThemeHost themes, BookCatalogService catalogService, IGameSceneManager sceneManager)
+    public MainPage(GameViewModel model, ThemeHost themes, BookCatalogService catalogService, IGameSceneManager sceneManager,
+        EarnedUnlock unlock)
     {
         InitializeComponent();
         this.model = model;
+        this.unlock = unlock;
         this.themes = themes;
         this.catalogService = catalogService;
         this.sceneManager = sceneManager;
         BindingContext = model;
         NavigationPage.SetHasNavigationBar(this, false);
         LayOutStations(model.Stations.Count);
+        PowerUpColumns.ColumnDefinitions = [.. model.PowerUps.Select(_ => new ColumnDefinition(GridLength.Star))];
         ThemeButton.IsVisible = themes.Choices.Count > 1;
         sceneManager.LoadScene<GuildHallScene>(GameView);
         model.PropertyChanged += OnModelChanged;
+        model.Unlocked += OnUnlocked;
+        model.LevelReached += OnLevelReached;
         timer = Dispatcher.CreateTimer();
         timer.Interval = TimeSpan.FromMilliseconds(100);
         timer.Tick += (_, _) => model.Frame();
@@ -39,6 +45,17 @@ public partial class MainPage : ContentPage
     {
         StationRows.RowDefinitions = [.. Enumerable.Range(0, count).Select(_ => new RowDefinition(GridLength.Star))];
         HireColumns.ColumnDefinitions = [.. Enumerable.Range(0, count).Select(_ => new ColumnDefinition(GridLength.Star))];
+    }
+
+    // A level reached: a small shake, and the dock's count (now carrying the level's name)
+    // gives a short bounce. Reduce Motion gets just the message.
+    private async void OnLevelReached()
+    {
+        if (Motion.Reduced) return;
+        foreach (var x in new[] { -6.0, 6, -3, 0 })
+            await Root.TranslateToAsync(x, 0, 40);
+        await DeliveredLabel.ScaleToAsync(1.25, 160, Easing.CubicOut);
+        await DeliveredLabel.ScaleToAsync(1, 260, Easing.SpringOut);
     }
 
     private void OnModelChanged(object? sender, PropertyChangedEventArgs e)
@@ -75,8 +92,96 @@ public partial class MainPage : ContentPage
         if (!model.Paused) sceneManager.Start();
     }
 
-    private async void OnAboutClicked(object? sender, EventArgs e) =>
-        await Navigation.PushAsync(new AboutPage(catalogService));
+    private async void OnAboutClicked(object? sender, EventArgs e) => await OpenAbout(highlight: false);
+
+    private Task OpenAbout(bool highlight) => Navigation.PushAsync(new AboutPage(catalogService, unlock, highlight));
+
+    // The earned unlock. Big on purpose: nobody should miss it. Reduce Motion gets the same
+    // card without the shake, the flash or the flight into the About button.
+    private async void OnUnlocked()
+    {
+        var calm = Motion.Reduced;
+        UnlockCard.Shadow = calm ? null : new Shadow
+        {
+            Brush = new SolidColorBrush(Color.FromArgb(model.Theme.Palette.Accent)), Radius = 48, Opacity = 0.95f,
+            Offset = new Point(0, 0),
+        };
+        UnlockCard.Opacity = 0;
+        UnlockCard.Scale = calm ? 1 : 0.3;
+        UnlockCard.TranslationX = UnlockCard.TranslationY = 0;
+        UnlockOverlay.IsVisible = true;
+        if (calm)
+        {
+            await UnlockCard.FadeToAsync(1, 200);
+            return;
+        }
+
+        UnlockFlash.IsVisible = true;
+        async Task Flash()
+        {
+            for (var i = 0; i < 3; i++)
+            {
+                await UnlockFlash.FadeToAsync(0.6, 110);
+                await UnlockFlash.FadeToAsync(0, 190);
+            }
+        }
+        var flash = Flash();
+        foreach (var x in new[] { -16.0, 16, -12, 12, -8, 8, -4, 0 })
+            await Root.TranslateToAsync(x, 0, 45);
+        await Task.WhenAll(flash, UnlockCard.FadeToAsync(1, 180), UnlockCard.ScaleToAsync(1, 420, Easing.SpringOut));
+        UnlockFlash.IsVisible = false;
+        // A slow glow while the card waits for a tap.
+        for (var i = 0; i < 3 && UnlockOverlay.IsVisible; i++)
+        {
+            await UnlockCard.ScaleToAsync(1.04, 420, Easing.SinInOut);
+            await UnlockCard.ScaleToAsync(1, 420, Easing.SinInOut);
+        }
+    }
+
+    private async void OnUnlockShow(object? sender, EventArgs e)
+    {
+        await CloseUnlock();
+        await OpenAbout(highlight: true);
+    }
+
+    private async void OnUnlockLater(object? sender, EventArgs e)
+    {
+        await CloseUnlock();
+        if (Motion.Reduced) return;
+        // Point at where it went.
+        for (var i = 0; i < 3; i++)
+        {
+            await AboutButton.ScaleToAsync(1.35, 180, Easing.CubicOut);
+            await AboutButton.ScaleToAsync(1, 180, Easing.CubicIn);
+        }
+    }
+
+    // The card flies into the About button and is gone: that's where the room now lives.
+    private async Task CloseUnlock()
+    {
+        if (!Motion.Reduced)
+        {
+            var from = Centre(UnlockCard);
+            var to = Centre(AboutButton);
+            await Task.WhenAll(
+                UnlockCard.TranslateToAsync(to.X - from.X, to.Y - from.Y, 380, Easing.CubicIn),
+                UnlockCard.ScaleToAsync(0.05, 380, Easing.CubicIn),
+                UnlockCard.FadeToAsync(0.2, 380));
+        }
+        UnlockOverlay.IsVisible = false;
+    }
+
+    // Where a view's middle is on the page, without its current translation.
+    private static Point Centre(VisualElement view)
+    {
+        double x = view.Width / 2, y = view.Height / 2;
+        for (Element? e = view; e is VisualElement v && e is not Page; e = e.Parent)
+        {
+            x += v.X;
+            y += v.Y;
+        }
+        return new Point(x, y);
+    }
 
     // The picker shows every bundled theme as a card; choosing one swaps the whole game in place.
     private async void OnThemeClicked(object? sender, EventArgs e)
@@ -161,6 +266,7 @@ public partial class MainPage : ContentPage
         {
             timer.Stop();
             model.PropertyChanged -= OnModelChanged;
+            model.Unlocked -= OnUnlocked;
         }
         base.OnHandlerChanging(args);
     }

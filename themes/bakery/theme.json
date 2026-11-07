@@ -2,7 +2,7 @@
   "$schema": "../theme.schema.json",
   "id": "bakery",
   "title": "VILLAGE BAKERY",
-  "license": "Copyright Clayton Harbour. Candidate pack: draft words; art to be CC BY 4.0 if chosen for the public release.",
+  "license": "Copyright Clayton Harbour. Art, voices, words and rules licensed CC BY 4.0; see LICENSE.",
   "gameplay": "gameplay.json",
   "background": "art/background.png",
   "palette": {
@@ -29,6 +29,7 @@
       "hireLabel": "Mixer",
       "hireMessage": "Another mixer rolls up their sleeves.",
       "actor": "art/mixer.png",
+      "voice": "audio/mixer-welcome.wav", "voiceId": "af_sarah", "speaker": "woman",
       "collectLabel": "Collect {n}",
       "idleLabel": "Kneading…",
       "collectMessage": "Fresh dough. Sell it, or bake something better.",
@@ -43,6 +44,7 @@
       "hireLabel": "Baker",
       "hireMessage": "Another baker ties an apron.",
       "actor": "art/baker.png",
+      "voice": "audio/baker-welcome.wav", "voiceId": "bm_fable", "speaker": "man",
       "sendLabel": "Bake {n} →",
       "sendMessage": "Dough goes in. The oven only bakes a full tray.",
       "sellMessage": "A warm loaf sold. +{price} coins.",
@@ -58,14 +60,55 @@
       "hireLabel": "Server",
       "hireMessage": "Someone new behind the counter.",
       "actor": "art/server.png",
+      "voice": "audio/server-welcome.wav", "voiceId": "af_nicole", "speaker": "woman",
       "sendLabel": "Decorate {n} →",
       "sendMessage": "Loaves head to the counter for icing.",
       "sellsAll": true,
       "sellMessage": "The morning queue buys all {n}. +{total} coins."
     }
   ],
+  "powerUps": [
+    {
+      "id": "busy-hands",
+      "label": "Busy Hands",
+      "icon": "art/powerups/busy-hands.png",
+      "message": "Sleeves rolled up. The mixers work twice as fast for 30 seconds."
+    },
+    {
+      "id": "hot-oven",
+      "label": "Hot Oven",
+      "icon": "art/powerup.png",
+      "message": "The oven roars. Two extra loaves a batch for 45 seconds."
+    },
+    {
+      "id": "market-day",
+      "label": "Market Day",
+      "icon": "art/powerups/market-day.png",
+      "message": "It's market day. Everything sells for twice the price for 30 seconds."
+    }
+  ],
+  "levels": [
+    {
+      "id": "head-baker",
+      "label": "Head Baker",
+      "badge": "art/levels/level-1.png",
+      "message": "Head Baker! The counter sells for 2 coins more."
+    },
+    {
+      "id": "early-riser",
+      "label": "Early Riser",
+      "badge": "art/levels/level-2.png",
+      "message": "Early Riser! The mixers work a quarter faster."
+    },
+    {
+      "id": "master-baker",
+      "label": "Master Baker",
+      "badge": "art/levels/level-3.png",
+      "message": "Master Baker! Everyone in the bakery works a little faster."
+    }
+  ],
   "strings": {
-    "openVoice": null,
+    "openVoice": "audio/mixer-welcome.wav",
     "coins": "{n} coins",
     "pause": "Pause",
     "resume": "Resume",

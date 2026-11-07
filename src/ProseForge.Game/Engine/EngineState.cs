@@ -13,12 +13,21 @@ public sealed record EngineState(
     ImmutableArray<StationState> Stations,
     ImmutableArray<int> Tools)
 {
+    // Seconds each power-up still has to run, in the gameplay's order; 0 when it isn't running.
+    public ImmutableArray<double> PowerUpsLeft { get; init; } = [];
+
+    // Seconds of play so far (paused time doesn't count): the clock power-up visits run on.
+    public double PlayedSeconds { get; init; }
+
     public bool CanAct => Started && !Paused;
 
     public static EngineState New(Gameplay gameplay) => new(
         Started: false, Paused: false, Coins: 0, Delivered: 0, FinishedChain: false,
         [.. gameplay.Stations.Select(s => new StationState(s.StartingWorkers, 0, 0, 0, 0))],
-        [.. gameplay.AllTools.Select(t => t.Starting)]);
+        [.. gameplay.AllTools.Select(t => t.Starting)])
+    {
+        PowerUpsLeft = [.. gameplay.AllPowerUps.Select(_ => 0.0)],
+    };
 
     public bool GoalReached(Gameplay gameplay) =>
         gameplay.Goal is { } goal && Delivered >= goal.Delivered;

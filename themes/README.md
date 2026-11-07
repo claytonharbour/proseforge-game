@@ -16,7 +16,7 @@ a real pack for each rule and check the problem is reported. **Error** stops the
 | `gameplay.json` | yes | stations, prices, tools, payout rule ([schema](gameplay.schema.json)) |
 | `LICENSE` | yes | who owns the pack and how it may be used |
 | `CREDITS.md` | for art | who made each picture and sound |
-| `art/*.png` | | pictures, PNG only |
+| `art/*.png` | | pictures: PNG masters (WebP also loads; release builds ship WebP copies, see docs/RELEASE.md) |
 | `audio/*.wav` | | voices |
 
 A pack is listed in [`index.json`](index.json): under `themes` if store builds ship it, or under
@@ -68,7 +68,7 @@ fixed height. The guide already allows for both.
 
 | Picture | Rule | Level |
 |---|---|---|
-| any | PNG | error |
+| any | PNG or WebP | error |
 | `background` | portrait, aspect between 9:16 and 2:3 | error |
 | `background` | at least 1024 wide; 1080×1920 is ideal | warning |
 | `background` | a calm scene **without** the station characters in it; anything that must be seen goes in the green windows of the art guide | guidance |
@@ -78,6 +78,25 @@ fixed height. The guide already allows for both.
 The Guild is the reference. Its hall is the background, and each worker is a separate cut-out
 standing over their own bar. A background with the characters painted in can't line up with the
 bars on every phone.
+
+## Voices
+
+A station's `voice` is a short greeting (`audio/*.wav`), played when someone is hired there and when
+the worker is tapped. A pack with no voices is complete; a missing file just stays silent.
+
+Each voiced station also says which voice recorded it and who its picture shows:
+
+```json
+"voice": "audio/keeper-welcome.wav", "voiceId": "bf_alice", "speaker": "woman"
+```
+
+`voiceId` is the text-to-speech voice (ours are Kokoro voices: `af_`/`bf_` are women's voices,
+`am_`/`bm_` men's). `speaker` is `"woman"` or `"man"`, set by whoever made the actor picture.
+`make theme-check` fails the pack if the two disagree, or if a voiced station leaves either out.
+A voice whose id doesn't give its gender, such as a greeting you recorded yourself, also says whose
+voice it is: `"voiceId": "my-recording", "voiceGender": "woman"`. We added it
+after eleven greetings shipped in the wrong voice for their picture, because the voices were chosen
+before the art existed. Credit the voice in `CREDITS.md` as well.
 
 ## Words and colours
 

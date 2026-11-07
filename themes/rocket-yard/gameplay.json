@@ -2,6 +2,52 @@
   "$schema": "../gameplay.schema.json",
   "id": "rocket-yard",
   "payout": "FinalStageOnly",
+  "powerUps": [
+    {
+      "id": "countdown",
+      "cost": 40,
+      "seconds": 30,
+      "unlockAt": 0,
+      "every": 45,
+      "stays": 15,
+      "effect": { "kind": "Speed", "station": "launch", "factor": 2 }
+    },
+    {
+      "id": "spare-parts",
+      "cost": 50,
+      "seconds": 30,
+      "unlockAt": 25,
+      "every": 60,
+      "stays": 15,
+      "effect": { "kind": "Batch", "station": "parts", "add": 1 }
+    },
+    {
+      "id": "sponsor-deal",
+      "cost": 70,
+      "seconds": 30,
+      "unlockAt": 100,
+      "every": 90,
+      "stays": 15,
+      "effect": { "kind": "Price", "station": "launch", "factor": 2 }
+    }
+  ],
+  "levels": [
+    {
+      "id": "flight-director",
+      "delivered": 25,
+      "reward": { "kind": "Price", "station": "launch", "add": 1 }
+    },
+    {
+      "id": "mission-control",
+      "delivered": 100,
+      "reward": { "kind": "Speed", "station": "assemble", "factor": 1.25 }
+    },
+    {
+      "id": "star-admiral",
+      "delivered": 250,
+      "reward": { "kind": "Speed", "station": "*", "factor": 1.2 }
+    }
+  ],
   "stations": [
     {
       "id": "parts",

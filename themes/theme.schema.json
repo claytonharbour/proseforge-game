@@ -179,6 +179,29 @@
             ],
             "description": "Sound played on hire and when the worker is tapped (a path in this pack)"
           },
+          "voiceId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The text-to-speech voice that recorded the greeting, e.g. \"bf_alice\". Kokoro voice ids start with af_/bf_ (female) or am_/bm_ (male); theme-check compares that with speaker. Required when the station has a voice."
+          },
+          "speaker": {
+            "enum": [
+              "woman",
+              "man",
+              null
+            ],
+            "description": "Who the actor picture shows. Set by whoever made the art; theme-check fails the pack if the voice is the other gender. Required when the station has a voice."
+          },
+          "voiceGender": {
+            "enum": [
+              "woman",
+              "man",
+              null
+            ],
+            "description": "Only for a voice whose id doesn't give its gender (anything but a Kokoro voice, such as a greeting you recorded yourself): whose voice it is."
+          },
           "collectLabel": {
             "type": [
               "string",
@@ -398,6 +421,107 @@
             "null"
           ],
           "description": "Sound played when the game is opened (a path in this pack)"
+        },
+        "powerUpButton": {
+          "type": "string",
+          "description": "The power-up button while it can be bought: {label}, {cost}. Default \"{label} · {cost}\"."
+        },
+        "powerUpRunning": {
+          "type": "string",
+          "description": "The power-up button while it runs: {label}, {left} (whole seconds). Default \"{label} · {left}s\"."
+        },
+        "powerUpCost": {
+          "type": "string",
+          "description": "The power-up button's second line, under its name, while it can be bought: {cost}. Default \"{cost}\"."
+        },
+        "powerUpLeft": {
+          "type": "string",
+          "description": "The power-up button's second line, under its name, while it runs: {left} (whole seconds). Default \"{left}s\"."
+        }
+      }
+    },
+    "powerUps": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "description": "How each power-up in gameplay.json looks and reads, by id.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The button's name: \"Hot Oven\"."
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Said when it starts."
+          },
+          "icon": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "A square PNG inside the pack; a drawn stand-in shows without one."
+          }
+        }
+      }
+    },
+    "levels": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "description": "How each level in gameplay.json looks and sounds, by id.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Shown beside the delivered count once reached: \"Head Baker\"."
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Said when it's reached."
+          },
+          "badge": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "A square PNG inside the pack; a drawn stand-in shows without one."
+          },
+          "voice": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "A WAV inside the pack, played when it's reached."
+          }
         }
       }
     }

@@ -9,6 +9,52 @@
       "upgradeCost": 40
     }
   ],
+  "powerUps": [
+    {
+      "id": "busy-hands",
+      "cost": 40,
+      "seconds": 30,
+      "unlockAt": 0,
+      "every": 45,
+      "stays": 15,
+      "effect": { "kind": "Speed", "station": "mix", "factor": 2 }
+    },
+    {
+      "id": "hot-oven",
+      "cost": 60,
+      "seconds": 45,
+      "unlockAt": 25,
+      "every": 60,
+      "stays": 15,
+      "effect": { "kind": "Batch", "station": "bake", "add": 2 }
+    },
+    {
+      "id": "market-day",
+      "cost": 70,
+      "seconds": 30,
+      "unlockAt": 100,
+      "every": 90,
+      "stays": 15,
+      "effect": { "kind": "Price", "station": "*", "factor": 2 }
+    }
+  ],
+  "levels": [
+    {
+      "id": "head-baker",
+      "delivered": 25,
+      "reward": { "kind": "Price", "station": "counter", "add": 2 }
+    },
+    {
+      "id": "early-riser",
+      "delivered": 100,
+      "reward": { "kind": "Speed", "station": "mix", "factor": 1.25 }
+    },
+    {
+      "id": "master-baker",
+      "delivered": 250,
+      "reward": { "kind": "Speed", "station": "*", "factor": 1.2 }
+    }
+  ],
   "stations": [
     {
       "id": "mix",

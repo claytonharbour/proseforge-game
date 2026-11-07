@@ -2,6 +2,16 @@
   "$schema": "../gameplay.schema.json",
   "id": "guild",
   "payout": "AnyStage",
+  "powerUps": [
+    { "id": "midnight-oil", "cost": 40, "seconds": 30, "unlockAt": 0, "every": 45, "stays": 15, "effect": { "kind": "Speed", "station": "*", "factor": 2 } },
+    { "id": "second-quill", "cost": 50, "seconds": 30, "unlockAt": 25, "every": 60, "stays": 15, "effect": { "kind": "Batch", "station": "write", "add": 1 } },
+    { "id": "feast-day", "cost": 60, "seconds": 30, "unlockAt": 100, "every": 90, "stays": 15, "effect": { "kind": "Price", "station": "*", "factor": 2 } }
+  ],
+  "levels": [
+    { "id": "master-scribe", "delivered": 25, "reward": { "kind": "Speed", "station": "write", "factor": 1.25 } },
+    { "id": "guild-archivist", "delivered": 100, "reward": { "kind": "Price", "station": "illustrate", "add": 3 } },
+    { "id": "master-storykeeper", "delivered": 250, "reward": { "kind": "Price", "station": "perform", "add": 6 } }
+  ],
   "stations": [
     { "id": "write", "secondsPerJob": 4, "hireCost": 25, "startingWorkers": 1, "sellPrice": 5,
       "outputCap": 20, "collectByHand": true },

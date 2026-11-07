@@ -7,7 +7,7 @@ public static class ScreenLayout
 {
     public const double HeaderHeight = 92;    // title row, goal and message: fixed, so no theme can move it
     public const double RowsTop = 4;          // gap under the header
-    public const double DockReserve = 112;    // bottom space kept for the dock (delivered, pause, hire)
+    public const double DockReserve = 112;    // bottom space kept for the dock (delivered, hire, pause; power-ups)
     public const double RowSpacing = 5;
     public const double SidePadding = 10;
     public const double BarHeight = 60;       // every station's bar, in every theme
@@ -45,6 +45,27 @@ public static class ScreenLayout
             rows.Add(new Station(new Box(SidePadding, top, inner, band), new Box(SidePadding, top, inner, band - BarHeight), bar, actor));
         }
         return new Screen(width, height, new Box(0, 0, width, HeaderHeight), rows, new Box(0, rowsBottom, width, DockReserve));
+    }
+
+    // A desktop window for the game: phone-shaped, so the art and the measured layout hold.
+    public sealed record Window(double Width, double Height, double MinWidth, double MinHeight, double X, double Y);
+
+    // The window's page shape: a 9:19.5 phone, between the guide's 9:16 and 9:20.
+    public const double DesktopPage = 9.0 / 19.5;
+    public const double DesktopHeight = 1040;   // chosen by eye: a tall phone on a desktop
+    public const double MinBand = BarHeight + 40;  // every station keeps its bar and a strip of art above it
+    public const double MinWidth = 360;         // the narrowest phone we measure: the header's buttons fit
+
+    // The default size and the smallest allowed for a screen of this size in points, centred on it.
+    // A short screen gets 90% of its height, never more, and never smaller than
+    // the minimum, which keeps every bar on screen with art above it.
+    public static Window DesktopWindow(double screenWidth, double screenHeight, int stations = 3)
+    {
+        var minHeight = HeaderHeight + RowsTop + DockReserve + stations * MinBand + (stations - 1) * RowSpacing;
+        var height = Math.Max(minHeight, Math.Min(DesktopHeight, Math.Round(screenHeight * 0.9)));
+        var width = Math.Max(MinWidth, Math.Round(height * DesktopPage));
+        return new Window(width, height, MinWidth, minHeight,
+            Math.Max(0, (screenWidth - width) / 2), Math.Max(0, (screenHeight - height) / 2));
     }
 
     // The background is scaled to fill the page and centred (AspectFill), so a page narrower than the

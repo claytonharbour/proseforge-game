@@ -80,6 +80,25 @@ public static partial class ThemeSwitch
         return new(theme, restore(theme.Gameplay) ?? EngineState.New(theme.Gameplay), load.Problems);
     }
 
+    // The order of a live switch, kept apart from the screen so a test can watch it. The new
+    // pack and its game are checked first; only when both are ready is the current game left (and
+    // saved), the new one built, the colours repainted and the choice remembered. A refused switch
+    // touches nothing. Returns the game now in play and, when refused, why.
+    public static (TGame Game, string? Refusal) Run<TGame>(TGame current, string currentId, string id,
+        Func<string, ThemeSwitchPlan> prepare, Func<ThemeSwitchPlan, TGame> build,
+        Action<TGame> leave, Action<TGame> paint, Action<string> remember)
+    {
+        if (id == currentId) return (current, null);
+        var plan = prepare(id);
+        if (!plan.Ready)
+            return (current, string.Join(" ", plan.Problems.Where(p => p.Level == ProblemLevel.Error).Select(p => p.Message)));
+        leave(current);
+        var next = build(plan);
+        paint(next);
+        remember(id);
+        return (next, null);
+    }
+
     [GeneratedRegex("^[a-z0-9]+(-[a-z0-9]+)*$")]
     private static partial Regex IdPattern();
 }

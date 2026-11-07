@@ -1,0 +1,4 @@
+Use case: stylized-concept. Asset type: a compact mobile-game icon for the Village Bakery theme of One More Story. The attached bakery background is STYLE and palette reference only, not an edit target. Match its cosy sunlit storybook 3D illustration, warm stone, honeyed wood and golden baked-goods palette. Centered single bold silhouette, simple and legible at 48-point size, square canvas, generous transparent margins, genuine transparent background and clean alpha. No scene/background/floor, no text or numerals, no logos or watermark. Hot Oven power-up: one small freestanding old-fashioned arched brick oven, its open mouth glowing with bright orange coals and a single loaf visibly baking. Warm, energetic, inviting, unmistakably an oven. No other objects.
+
+Style reference: themes/bakery/art/background.png
+Generator: built-in image_gen, transparent_background=true. Resized to 512x512 without flattening alpha.

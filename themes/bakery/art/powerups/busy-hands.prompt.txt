@@ -1,0 +1,7 @@
+Generation prompt:
+Use case: stylized-concept. Original transparent mobile-game power-up icon for One More Story Village Bakery theme, Busy Hands. Attached bakery scene is STYLE and PALETTE reference only, not a subject. One large copper whisk angled inside one glazed warm-cream ceramic mixing bowl, a small dynamic puff of white flour above it, together ONE compact grouped silhouette. Match cosy sunlit storybook 3D illustration, golden pastries, honeyed wood, warm stone. Clear simple shape readable at 48 points; centered square with generous transparent margins and real alpha. No kitchen, floor, scenery, hands, text, numerals, border, badge, watermark, extra objects.
+
+Refinement prompt (to remove flour haze and restore clean alpha):
+Use case: precise-object-edit. Edit the attached Busy Hands power-up icon. Preserve the copper whisk, cream glazed mixing bowl, batter, and warm dimensional storybook style. REMOVE ALL white flour cloud, white mist, white haze, glow, and stray particles from the area around the bowl. The outside of the solid whisk-and-bowl silhouette must be genuinely fully transparent, including every corner and all generous margins; no faint off-white wash. Keep the object centered and bold for 48-point mobile display. Do not add hands, other objects, scene, floor, background, text, border, or watermark.
+
+Reference: themes/bakery/art/background.png. Generated at 1254×1254, mechanically resized to 512×512.

@@ -4,11 +4,12 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:engine="clr-namespace:Orbit.Engine;assembly=Orbit.Engine"
+             xmlns:local="clr-namespace:ProseForge.Game"
              xmlns:vm="clr-namespace:ProseForge.Game.ViewModels"
              x:Class="ProseForge.Game.MainPage"
              x:DataType="vm:GameViewModel"
              Title="One More Story" BackgroundColor="{DynamicResource Background}">
-    <Grid RowDefinitions="Auto,*" RowSpacing="0" MaximumWidthRequest="600">
+    <Grid x:Name="Root" RowDefinitions="Auto,*" RowSpacing="0" MaximumWidthRequest="600">
         <Image Grid.RowSpan="2" Source="{Binding BackgroundImage}" Aspect="AspectFill" Opacity="0.9" />
 
         <!-- Sizes here are ScreenLayout's (Themes/ScreenLayout.cs), which the art guide is drawn from. -->
@@ -20,7 +21,7 @@
                 <Button x:Name="ThemeButton" Grid.Column="2" Text="Theme" FontSize="11" HeightRequest="30" Padding="6,0"
                         Clicked="OnThemeClicked" SemanticProperties.Hint="Switch to another theme; each keeps its own game"
                         BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}" />
-                <Button Grid.Column="3" Text="About" FontSize="11" HeightRequest="30" Padding="6,0" Clicked="OnAboutClicked"
+                <Button x:Name="AboutButton" Grid.Column="3" Text="About" FontSize="11" HeightRequest="30" Padding="6,0" Clicked="OnAboutClicked"
                         BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}" />
                 <Label Grid.Row="1" Grid.ColumnSpan="4" Text="{Binding Goal}" FontSize="11" TextColor="{DynamicResource Text}" MaxLines="2" />
                 <Label Grid.Row="2" Grid.ColumnSpan="4" Text="{Binding Message}" FontSize="10" TextColor="{DynamicResource MutedText}" MaxLines="1" />
@@ -40,6 +41,13 @@
                         </Image>
                         <Border VerticalOptions="End" HeightRequest="60" BackgroundColor="{DynamicResource Panel}"
                                 Stroke="{DynamicResource PanelStroke}" StrokeShape="RoundRectangle 8" Padding="6,2">
+                            <!-- A boosted station glows: a level or a running power-up is working on it. -->
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding Boosted}" Value="True">
+                                    <Setter Property="Stroke" Value="{DynamicResource Accent}" />
+                                    <Setter Property="StrokeThickness" Value="2.5" />
+                                </DataTrigger>
+                            </Border.Triggers>
                             <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="*,2" ColumnSpacing="4" RowSpacing="1">
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
                                     <Label Text="{Binding Status}" FontSize="10" TextColor="{DynamicResource Accent}">
@@ -68,35 +76,73 @@
         <Border Grid.Row="1" VerticalOptions="End" BackgroundColor="{DynamicResource Dock}" Stroke="{DynamicResource DockStroke}"
                 StrokeShape="RoundRectangle 12" Padding="10,6" Margin="6,0,6,6">
             <VerticalStackLayout Spacing="4">
-                <Grid ColumnDefinitions="*,Auto">
-                    <Label Text="{Binding Delivered}" FontSize="11" TextColor="{DynamicResource MutedText}" VerticalOptions="Center" />
-                    <Button Grid.Column="1" Text="{Binding PauseText}" Command="{Binding PauseCommand}" IsEnabled="{Binding Started}"
+                <!-- Two rows, so the dock fits the space the rows and the art guide leave it (ScreenLayout.DockReserve):
+                     the count, Hire and Pause, then the power-ups. -->
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                    <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                        <Image Source="{Binding LevelBadge}" IsVisible="{Binding HasLevelBadge}" WidthRequest="24" HeightRequest="24"
+                               Aspect="AspectFit" SemanticProperties.Description="Level badge" />
+                        <Label x:Name="DeliveredLabel" Text="{Binding Delivered}" FontSize="11" TextColor="{DynamicResource MutedText}"
+                               VerticalOptions="Center" MaxLines="2" AnchorX="0" />
+                    </HorizontalStackLayout>
+                    <Button Grid.Column="1" Text="{Binding RecruitText}" Command="{Binding RecruitCommand}" FontSize="11" HeightRequest="32" Padding="9,0"
+                            BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding RecruitOpen}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource ButtonActive}" />
+                                <Setter Property="TextColor" Value="{DynamicResource Background}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button Grid.Column="2" Text="{Binding PauseText}" Command="{Binding PauseCommand}" IsEnabled="{Binding Started}"
                             FontSize="11" HeightRequest="32" Padding="9,0"
                             BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}" />
                 </Grid>
+                <!-- The theme's power-ups, one button each: its name and price, or the seconds left while it
+                     runs. Each has its own clock, so they can run together. The ring is drawn in code
+                     (CountdownRingView), so a pack needs no art for it. -->
+                <Grid x:Name="PowerUpColumns" ColumnSpacing="4" IsVisible="{Binding ShowPowerUps}"
+                      BindableLayout.ItemsSource="{Binding PowerUps}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PowerUpViewModel">
+                            <Grid Grid.Column="{Binding Index}" IsVisible="{Binding Visible}">
+                                <Button Command="{Binding Command}" IsEnabled="{Binding Enabled}" HeightRequest="36" Padding="0"
+                                        SemanticProperties.Description="{Binding Text}"
+                                        SemanticProperties.Hint="Spend coins on a short boost. Pressing it again restarts its clock."
+                                        BackgroundColor="{DynamicResource Accent}" />
+                                <!-- The name over the price, or over the seconds left: three buttons share the dock. -->
+                                <VerticalStackLayout InputTransparent="True" VerticalOptions="Center" Margin="27,0,4,0" Spacing="0">
+                                    <Label Text="{Binding Name}" FontSize="10" LineBreakMode="TailTruncation" MaxLines="1"
+                                           TextColor="{DynamicResource OnAccent}" />
+                                    <Label Text="{Binding Detail}" FontSize="10" FontAttributes="Bold"
+                                           TextColor="{DynamicResource OnAccent}" />
+                                </VerticalStackLayout>
+                                <local:CountdownRingView InputTransparent="True" WidthRequest="20" HeightRequest="20"
+                                                         HorizontalOptions="Start" VerticalOptions="Center" Margin="3,0,0,0"
+                                                         Fraction="{Binding Left}" Running="{Binding Ticking}" Colour="{Binding RingColour}" />
+                                <Image Source="{Binding Icon}" IsVisible="{Binding HasIcon}" InputTransparent="True"
+                                       WidthRequest="14" HeightRequest="14" Aspect="AspectFit"
+                                       HorizontalOptions="Start" VerticalOptions="Center" Margin="6,0,0,0" />
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </Grid>
                 <Button Text="{Binding OpenText}" Command="{Binding OpenCommand}" IsVisible="{Binding ShowOpen}"
                         FontSize="13" HeightRequest="38" BackgroundColor="{DynamicResource Accent}" TextColor="{DynamicResource OnAccent}" />
-                <Button Text="{Binding RecruitText}" Command="{Binding RecruitCommand}" FontSize="11" HeightRequest="32"
-                        BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}">
-                    <Button.Triggers>
-                        <DataTrigger TargetType="Button" Binding="{Binding RecruitOpen}" Value="True">
-                            <Setter Property="BackgroundColor" Value="{DynamicResource ButtonActive}" />
-                            <Setter Property="TextColor" Value="{DynamicResource Background}" />
-                        </DataTrigger>
-                    </Button.Triggers>
-                </Button>
-                <VerticalStackLayout IsVisible="{Binding RecruitOpen}" Spacing="2">
+                <!-- Open, the hire row stands where the power-ups were, at their height, and the voices line is
+                     one thin row: the dock grows by that line only, so no station's bar is covered. -->
+                <VerticalStackLayout IsVisible="{Binding RecruitOpen}" Spacing="0">
                     <Grid x:Name="HireColumns" ColumnSpacing="3" BindableLayout.ItemsSource="{Binding Stations}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:StationViewModel">
                                 <Button Grid.Column="{Binding Index}" Text="{Binding HireText}" Command="{Binding HireCommand}"
-                                        IsEnabled="{Binding HireEnabled}" FontSize="10" HeightRequest="48" Padding="2,0" LineBreakMode="WordWrap"
+                                        IsEnabled="{Binding HireEnabled}" FontSize="10" HeightRequest="36" Padding="2,0" LineBreakMode="WordWrap"
                                         BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}" />
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </Grid>
-                    <HorizontalStackLayout Spacing="4">
-                        <Switch IsToggled="{Binding VoicesOn}" Scale="0.7" />
+                    <HorizontalStackLayout Spacing="2" HeightRequest="28" Margin="0,2,0,0">
+                        <Switch IsToggled="{Binding VoicesOn}" Scale="0.6" VerticalOptions="Center" Margin="-6,-10" />
                         <Label Text="{Binding AudioStatus}" FontSize="10" TextColor="{DynamicResource MutedText}" VerticalOptions="Center" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
@@ -125,6 +171,32 @@
                     </ScrollView>
                     <Button Text="Cancel" Clicked="OnThemePickerClose" FontSize="13" HeightRequest="40" CornerRadius="20"
                             BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- The earned unlock: at 100 deliveries across every theme the screen shakes and
+             flashes, this card glows, and closing it sends it into the About button, where "How this
+             was made" now waits. With Reduce Motion on, the card simply fades in and out. -->
+        <BoxView x:Name="UnlockFlash" Grid.RowSpan="2" IsVisible="False" Opacity="0" InputTransparent="True"
+                 Color="{DynamicResource Accent}" />
+        <Grid x:Name="UnlockOverlay" Grid.RowSpan="2" IsVisible="False" BackgroundColor="#B8000000" Padding="24">
+            <Border x:Name="UnlockCard" VerticalOptions="Center" StrokeThickness="4" Padding="20,22"
+                    Stroke="{DynamicResource Accent}" BackgroundColor="{DynamicResource Header}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="22" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="14">
+                    <Label Text="You found something" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center"
+                           TextColor="{DynamicResource Accent}" SemanticProperties.HeadingLevel="Level1" />
+                    <Label Text="A hundred deliveries! Here is how the pictures in this game were made: the first sketches, the phone checks, and what changed. The gallery is open for you now."
+                           FontSize="14" HorizontalTextAlignment="Center" TextColor="{DynamicResource Text}" />
+                    <Button Text="Show me" Clicked="OnUnlockShow" FontSize="15" FontAttributes="Bold" HeightRequest="46" CornerRadius="23"
+                            BackgroundColor="{DynamicResource Accent}" TextColor="{DynamicResource OnAccent}" />
+                    <Button Text="Later" Clicked="OnUnlockLater" FontSize="13" HeightRequest="40" CornerRadius="20"
+                            BackgroundColor="{DynamicResource Button}" TextColor="{DynamicResource Text}" />
+                    <Label Text="It stays under About, whenever you want it." FontSize="11" HorizontalOptions="Center"
+                           TextColor="{DynamicResource MutedText}" />
                 </VerticalStackLayout>
             </Border>
         </Grid>

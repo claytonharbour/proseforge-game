@@ -4,8 +4,9 @@
 *.user
 *.suo
 
-# Release signing and publishing. Secrets live in .env and off-tree files, never here.
+# Your settings: secrets in .env, everything else in .env.local (see env.local.example). Never committed.
 .env
+.env.local
 *.keystore
 *.jks
 *.mobileprovision
@@ -17,3 +18,4 @@ scripts/**/__pycache__/
 
 # macOS Finder metadata
 .DS_Store
+__pycache__/

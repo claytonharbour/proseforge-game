@@ -1,11 +1,10 @@
 {
   "default": "guild",
   "themes": [
-    "guild"
-  ],
-  "drafts": [
+    "guild",
     "santa",
     "bakery",
     "rocket-yard"
-  ]
+  ],
+  "drafts": []
 }

@@ -1,7 +1,14 @@
-Copyright Clayton Harbour.
+Rocket Yard theme pack for One More Story
+Copyright 2026 Clayton Harbour
 
-Candidate theme pack for One More Story.
-The words are drafts. The art, when added, is to be licensed CC BY 4.0
-(https://creativecommons.org/licenses/by/4.0/) if this pack is chosen for the
-public release; until then it is not published, and nothing in this folder may be
-redistributed.
+The art (everything under art/), the voices (everything under audio/) and the
+words and rules (theme.json, gameplay.json) in this folder are licensed under the Creative Commons
+Attribution 4.0 International licence (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
+
+You may share and adapt them, including for commercial use, as long as you
+give credit: "Rocket Yard theme by Clayton Harbour and the ProseForge team
+(CC BY 4.0)", link the licence, and say if you changed anything.
+See CREDITS.md for who made each file.
+
+The game's code is licensed separately under the Apache License 2.0.

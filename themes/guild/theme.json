@@ -2,7 +2,7 @@
   "$schema": "../theme.schema.json",
   "id": "guild",
   "title": "ONE MORE STORY",
-  "license": "Copyright Clayton Harbour. All rights reserved. Not for redistribution.",
+  "license": "Copyright Clayton Harbour. All rights reserved. The public code includes this pack's rules and words so the game runs and as an example of the format; they aren't licensed for reuse. Its art and voices ship only in the app, not in the public code.",
   "gameplay": "gameplay.json",
   "background": "art/guild-hall.png",
   "palette": {
@@ -14,7 +14,7 @@
     {
       "worker": "monk", "workers": "monks", "activity": "writing", "empty": "Monk · empty desk",
       "stockLabel": "Manuscripts: {n}", "hireLabel": "Monk", "hireMessage": "Another monk pulls up a chair.",
-      "voice": "audio/monk-welcome.wav",
+      "voice": "audio/monk-welcome.wav", "voiceId": "am_michael", "speaker": "man",
       "collectLabel": "Collect {n}", "idleLabel": "Quill at work…",
       "collectMessage": "Fresh manuscripts on your desk. Sell now, or make something richer.",
       "sellMessage": "A reader takes a story home. +{price} coins."
@@ -23,7 +23,7 @@
       "worker": "illuminator", "workers": "illuminators", "activity": "illustrating",
       "empty": "Illuminator · empty workshop", "stockLabel": "Illustrated: {n}",
       "hireLabel": "Illuminator", "hireMessage": "The illuminator opens a box of pigments.",
-      "actor": "art/illuminator.png", "voice": "audio/artist-welcome.wav",
+      "actor": "art/illuminator.png", "voice": "audio/artist-welcome.wav", "voiceId": "bf_emma", "speaker": "woman",
       "sendLabel": "Illustrate {n} →", "sendMessage": "A manuscript arrives at the illustration desk.",
       "sellMessage": "A reader takes a story home. +{price} coins."
     },
@@ -31,10 +31,26 @@
       "worker": "troubadour", "workers": "troubadours", "activity": "performing",
       "empty": "Troubadour · empty alcove", "stockLabel": "Performed: {n}",
       "hireLabel": "Troubadour", "hireMessage": "The troubadour tunes a lute.",
-      "actor": "art/troubadour.png", "voice": "audio/bard-welcome.wav",
+      "actor": "art/troubadour.png", "voice": "audio/bard-welcome.wav", "voiceId": "bm_george", "speaker": "man",
       "sendLabel": "Perform {n} →", "sendMessage": "An illustrated book is on its way to the town square.",
       "sellsAll": true, "sellMessage": "The town square takes all {n} performances. +{total} coins."
     }
+  ],
+  "powerUps": [
+    { "id": "midnight-oil", "label": "Midnight Oil", "icon": "art/powerup.png",
+      "message": "Candles lit. Every desk works twice as fast for 30 seconds." },
+    { "id": "second-quill", "label": "Second Quill", "icon": "art/powerups/second-quill.png",
+      "message": "A second quill at every desk. Each monk writes two pages at once for 30 seconds." },
+    { "id": "feast-day", "label": "Feast Day", "icon": "art/powerups/feast-day.png",
+      "message": "A feast day in town. Everything sells for twice the price for 30 seconds." }
+  ],
+  "levels": [
+    { "id": "master-scribe", "label": "Master Scribe", "badge": "art/levels/level-1.png", "voice": "audio/level-1.wav",
+      "message": "Master Scribe! Brother Pip writes a quarter faster." },
+    { "id": "guild-archivist", "label": "Guild Archivist", "badge": "art/levels/level-2.png", "voice": "audio/level-2.wav",
+      "message": "Guild Archivist! Illustrated stories sell for 3 coins more." },
+    { "id": "master-storykeeper", "label": "Master Storykeeper", "badge": "art/levels/level-3.png", "voice": "audio/level-3.wav",
+      "message": "Master Storykeeper! Performances sell for 6 coins more." }
   ],
   "strings": {
     "openButton": "Open the guild",
