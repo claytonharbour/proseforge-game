@@ -29,7 +29,8 @@ VENV_PY = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".venv", "bin
     must tell the reader to re-run through this path rather than to pip-install into a venv the
     running interpreter will never consult. """
 
-PACKAGE = os.environ.get("APP_ID", "ai.proseforge.game.onemorestory")  # One More Story's, unless you set your own
+PLACEHOLDER_APP_ID = "com.yourorg.yourgame"
+PACKAGE = os.environ.get("APP_ID", PLACEHOLDER_APP_ID)  # set your own in .env.local
 API = "https://androidpublisher.googleapis.com/androidpublisher/v3"
 UPLOAD_API = "https://androidpublisher.googleapis.com/upload/androidpublisher/v3"
 SCOPE = "https://www.googleapis.com/auth/androidpublisher"
@@ -136,6 +137,8 @@ def main():
     p.add_argument("--dry-run", action="store_true",
                    help="Validate and print the plan; touch nothing.")
     args = p.parse_args()
+    if PACKAGE == PLACEHOLDER_APP_ID:
+        sys.exit(f"APP_ID is still the placeholder {PLACEHOLDER_APP_ID}. Set your own in .env.local (see env.local.example).")
 
     if args.images:
         # ⛔ THIS RETURNS BEFORE THE BUNDLE IS EVER READ, and --aab is a required argument, so

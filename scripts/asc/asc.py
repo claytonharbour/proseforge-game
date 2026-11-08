@@ -16,7 +16,8 @@ VENV_PY = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".venv", "bin
 
 API = "https://api.appstoreconnect.apple.com/v1"
 P8 = os.path.expanduser(os.environ.get("APPLE_P8", ""))
-BUNDLE = os.environ.get("APP_ID", "ai.proseforge.game.onemorestory")  # One More Story's, unless you set your own
+PLACEHOLDER_APP_ID = "com.yourorg.yourgame"
+BUNDLE = os.environ.get("APP_ID", PLACEHOLDER_APP_ID)  # set your own in .env.local
 
 
 def die(m):
@@ -381,6 +382,8 @@ def cmd_submit(vs, confirm=None):
 
 
 if __name__ == "__main__":
+    if BUNDLE == PLACEHOLDER_APP_ID:
+        die(f"APP_ID is still the placeholder {PLACEHOLDER_APP_ID}. Set your own in .env.local (see env.local.example).")
     cmds = {"status": cmd_status, "groups": cmd_groups}
     if len(sys.argv) < 2:
         die("usage: asc.py status | groups | add-to-group <build> <group> | "

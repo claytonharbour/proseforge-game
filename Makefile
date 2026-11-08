@@ -6,7 +6,7 @@
 
 TESTS := tests/ProseForge.Game.Rules.Tests
 
-.PHONY: build test coverage theme-check theme-guide art-check optimize optimize-check release-assets
+.PHONY: build test run run-mac coverage theme-check theme-guide art-check optimize optimize-check release-assets
 
 build: ## Compile the game's rules and engine (everything the tests cover).
 	dotnet build $(TESTS) -c Release
@@ -16,8 +16,22 @@ test: ## Run the rules tests, the release optimizer's tests, and check every the
 	python3 -m unittest discover tools/optimize
 	$(MAKE) theme-check
 
-run-mac: ## Build and open the game on this Mac (no paid Apple account needed)
-	dotnet build $(PROJECT) -f net10.0-maccatalyst -c Debug "-t:Build;Run"
+# Where `make run` can run the game: one line per platform, naming the .NET target it builds.
+# Mac and Android are run on our machines. Windows is not tested: none of us has a Windows PC, and
+# the recipe may need a different shell there. If you get it working, please send us a patch.
+RUN_TFM_mac     := net10.0-maccatalyst
+RUN_TFM_android := net10.0-android
+RUN_TFM_windows := net10.0-windows10.0.19041.0
+RUN_PLATFORMS   := mac android windows
+
+run: ## Build and run the game: make run PLATFORM=mac|android|windows [DEVICE=<adb serial>] (Windows: not tested)
+	@test -n "$(RUN_TFM_$(PLATFORM))" || { echo "PLATFORM must be one of: $(RUN_PLATFORMS) (e.g. make run PLATFORM=mac)"; exit 2; }
+	dotnet build $(PROJECT) -f $(RUN_TFM_$(PLATFORM)) -c Debug "-t:Build;Run" \
+		-p:ApplicationId="$(APP_ID)" -p:ApplicationTitle="$(APP_TITLE)" \
+		$(if $(and $(DEVICE),$(filter android,$(PLATFORM))),-p:AdbTarget="-s $(DEVICE)")
+
+run-mac: ## Build and open the game on this Mac (no paid Apple account needed); same as make run PLATFORM=mac
+	@$(MAKE) --no-print-directory run PLATFORM=mac
 
 notices: ## Regenerate THIRD_PARTY_NOTICES.md from the packages the app ships (after a restore)
 	python3 tools/notices/notices.py
@@ -67,7 +81,9 @@ art-check: ## Lay the art guide over a background: make art-check ART=path/to/ba
 -include .env.local
 
 PROJECT     := src/ProseForge.Game/ProseForge.Game.csproj
-APP_ID      ?= ai.proseforge.game.onemorestory
+APP_ID      ?= com.yourorg.yourgame
+# The default is a placeholder: release and store commands refuse it until .env.local sets your own.
+PLACEHOLDER_APP_ID := com.yourorg.yourgame
 APP_TITLE   ?= One More Story
 ANDROID_SDK ?= $(HOME)/Library/Android/sdk
 JDK         ?= $(shell /usr/libexec/java_home -v 21 2>/dev/null)
@@ -88,10 +104,15 @@ IOS_PUBLISH     := src/ProseForge.Game/bin/Release/net10.0-ios/ios-arm64/publish
 # any other process on the machine can read it (`ps -wwEo command=`). Make expands $(VAR) itself,
 # so each program gets only the value it needs, on its own command line.
 
-.PHONY: build-android-release deploy-android-release build-ios-release upload-android upload-ios check-play-auth \
+# Release and store commands stop here until APP_ID is your own, so nothing is built or uploaded
+# under the placeholder.
+app-id:
+	@test "$(APP_ID)" != "$(PLACEHOLDER_APP_ID)" || { echo "APP_ID is still the placeholder $(PLACEHOLDER_APP_ID). Set your own in .env.local (see env.local.example)."; exit 2; }
+
+.PHONY: app-id build-android-release deploy-android-release build-ios-release upload-android upload-ios check-play-auth \
 	check-play-scripts asc-status
 
-build-android-release: release-assets ## Signed Release AAB for Play (needs ANDROID_* signing values in .env)
+build-android-release: release-assets app-id ## Signed Release AAB for Play (needs ANDROID_* signing values in .env)
 	@test -n "$(ANDROID_KEYSTORE_PATH)" || (echo "Error: ANDROID_KEYSTORE_PATH not set in .env" && exit 1)
 	@# a release never ships notices older than its packages.
 	dotnet restore $(PROJECT) >/dev/null && python3 tools/notices/notices.py --check
@@ -108,7 +129,7 @@ build-android-release: release-assets ## Signed Release AAB for Play (needs ANDR
 
 # Signed release APK on a device, to check the Release build before uploading (DEVICE=<adb serial>).
 # Verify by lastUpdateTime, not adb's exit code: a failed install keeps the old timestamp.
-deploy-android-release: release-assets ## Signed Release APK installed on DEVICE
+deploy-android-release: release-assets app-id ## Signed Release APK installed on DEVICE
 	@test -n "$(ANDROID_KEYSTORE_PATH)" || (echo "Error: ANDROID_KEYSTORE_PATH not set in .env" && exit 1)
 	@test -n "$(DEVICE)" || (echo "Error: DEVICE not set; pass DEVICE=<serial> from 'adb devices'" && exit 1)
 	@ANDROID_HOME="$(ANDROID_SDK)" JAVA_HOME="$(JDK)" \
@@ -122,7 +143,7 @@ deploy-android-release: release-assets ## Signed Release APK installed on DEVICE
 	adb -s $(DEVICE) install -r $(ANDROID_PUBLISH)/$(APP_ID)-Signed.apk
 	@adb -s $(DEVICE) shell dumpsys package $(APP_ID) | grep -E 'versionName|lastUpdateTime'
 
-build-ios-release: release-assets ## Release IPA for TestFlight (needs IOS_CODESIGN_KEY and IOS_PROVISIONING_PROFILE in .env)
+build-ios-release: release-assets app-id ## Release IPA for TestFlight (needs IOS_CODESIGN_KEY and IOS_PROVISIONING_PROFILE in .env)
 	@test -n "$(IOS_PROVISIONING_PROFILE)" || (echo "Error: IOS_PROVISIONING_PROFILE not set in .env" && exit 1)
 	@# An incremental build reused a stale merged manifest after Info.plist changed (the
 	@# encryption answer, ITSAppUsesNonExemptEncryption, went missing from the IPA). Always rebuild it.
@@ -152,7 +173,7 @@ $(ASC_VENV):
 
 # ⛔ Defaults to a DRAFT on the internal testing track, which reaches nobody. A public track needs
 #    both TRACK and ROLLOUT named, so a mistyped command can't publish.
-upload-android: $(PLAY_VENV) ## Upload the AAB to Play internal testing (draft by default)
+upload-android: $(PLAY_VENV) app-id ## Upload the AAB to Play internal testing (draft by default)
 	@test -n "$(GOOGLE_PLAY_SERVICE_ACCOUNT_JSON)" || (echo "Error: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON not set in .env" && exit 1)
 	@APP_ID="$(APP_ID)" GOOGLE_PLAY_SERVICE_ACCOUNT_JSON="$(GOOGLE_PLAY_SERVICE_ACCOUNT_JSON)" $(PLAY_PY) scripts/play/upload.py \
 		--aab "$(or $(AAB),$(ANDROID_PUBLISH)/$(APP_ID)-Signed.aab)" \
@@ -161,19 +182,19 @@ upload-android: $(PLAY_VENV) ## Upload the AAB to Play internal testing (draft b
 		$(if $(NOTES),--notes "$(NOTES)") \
 		$(if $(DRY_RUN),--dry-run)
 
-check-play-auth: $(PLAY_VENV) ## Prove the Play credential and grant without uploading anything
+check-play-auth: $(PLAY_VENV) app-id ## Prove the Play credential and grant without uploading anything
 	@APP_ID="$(APP_ID)" GOOGLE_PLAY_SERVICE_ACCOUNT_JSON="$(GOOGLE_PLAY_SERVICE_ACCOUNT_JSON)" $(PLAY_PY) scripts/play/upload.py --check
 
 check-play-scripts: $(PLAY_VENV) ## Offline tests for the upload script's guards
 	@$(PLAY_PY) scripts/play/test_upload.py
 
-asc-status: $(ASC_VENV) ## App Store Connect: builds, groups and their states
+asc-status: $(ASC_VENV) app-id ## App Store Connect: builds, groups and their states
 	@APP_ID="$(APP_ID)" APPLE_P8="$(APPLE_P8)" APPLE_KEY_ID="$(APPLE_KEY_ID)" APPLE_UUID="$(APPLE_UUID)" $(ASC_PY) scripts/asc/asc.py status
 
 # ⛔ The leading @ is a secret control: without it make echoes AC_PASSWORD (an Apple app-specific
 #    password) to the console. It is passed through the environment as @env:AC_PASSWORD, never on
 #    altool's command line, where any other process on the machine could read it.
-upload-ios: ## Upload the IPA to App Store Connect (TestFlight processes it; internal group only)
+upload-ios: app-id ## Upload the IPA to App Store Connect (TestFlight processes it; internal group only)
 	@test -n "$(APPLE_ID)" || (echo "Error: APPLE_ID not set in .env" && exit 1)
 	@AC_PASSWORD="$$(grep '^AC_PASSWORD=' .env | cut -d= -f2- | tr -d '"' | tr -d "'")" xcrun altool --upload-app \
 		-f "$(or $(IPA),$(IOS_PUBLISH)/ProseForge.Game.ipa)" -t ios -u "$(APPLE_ID)" -p @env:AC_PASSWORD
